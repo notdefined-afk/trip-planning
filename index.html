@@ -1,0 +1,1455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Headout · DayMind</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;background:#F2F2F7;font-family:'Inter',-apple-system,sans-serif;overflow:hidden;}
+#root{height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+
+/* TOP CHROME */
+#topbar{height:48px;flex-shrink:0;background:#fff;border-bottom:1px solid #EFEFEF;display:flex;align-items:center;padding:0 14px;gap:8px;}
+.tb-logo{font-size:15px;font-weight:900;color:#7B00FF;letter-spacing:-.02em;flex-shrink:0;}
+.tb-div{width:1px;height:14px;background:#E8E8E8;}
+.tabs{display:flex;gap:1px;overflow-x:auto;scrollbar-width:none;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{padding:4px 9px;border-radius:8px;font-size:10px;font-weight:600;cursor:pointer;color:#BBBBBB;transition:all .15s;user-select:none;white-space:nowrap;flex-shrink:0;}
+.tab.on{background:#F0E6FF;color:#7B00FF;}
+.tn{display:inline-flex;width:12px;height:12px;border-radius:50%;background:#E8E8E8;font-size:7px;font-weight:800;align-items:center;justify-content:center;margin-right:3px;}
+.tab.on .tn{background:#7B00FF;color:#fff;}
+.tb-r{margin-left:auto;flex-shrink:0;}
+.why-btn{padding:6px 14px;border-radius:9px;font-size:11px;font-weight:800;border:2px solid #7B00FF;color:#7B00FF;cursor:pointer;background:#F5F0FF;transition:all .15s;white-space:nowrap;letter-spacing:-.01em;}
+.why-btn:hover{background:#7B00FF;color:#fff;}
+.why-btn.open{background:#7B00FF;color:#fff;border-color:#7B00FF;}
+
+/* STAGE */
+#stage{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;padding:16px;}
+
+/* PHONE — scales to fill available height */
+#phone{
+  width:375px;
+  height:100%;
+  max-height:780px;
+  min-height:500px;
+  background:#fff;
+  border-radius:44px;
+  box-shadow:0 0 0 10px #1C1C1E,0 0 0 12px #2C2C2E,0 24px 56px rgba(0,0,0,.5);
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+  flex-shrink:0;
+  position:relative;
+}
+.sb{height:44px;background:#fff;display:flex;align-items:flex-end;justify-content:space-between;padding:0 20px 8px;flex-shrink:0;position:relative;z-index:10;}
+.sb::before{content:'';width:110px;height:30px;background:#1A1A1A;border-radius:0 0 18px 18px;position:absolute;top:0;left:50%;transform:translateX(-50%);}
+.sb-t{font-size:12px;font-weight:700;color:#000;}
+.sb-r{font-size:10px;color:#444;}
+#scr{flex:1;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;background:#fff;position:relative;}
+#scr::-webkit-scrollbar{display:none;}
+.bnav{display:flex;justify-content:space-around;align-items:center;padding:8px 0 14px;border-top:1px solid #EFEFEF;background:#fff;flex-shrink:0;}
+.bni{display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:2px 14px;}
+.bni-ic{font-size:20px;}
+.bni-lb{font-size:9px;color:#ccc;font-weight:500;}
+.bni.on .bni-lb{color:#000;font-weight:700;}
+
+/* MODAL OVERLAY inside phone */
+.modal-bg{position:absolute;inset:0;background:rgba(0,0,0,.5);z-index:50;display:flex;align-items:flex-end;}
+.modal-sheet{background:#fff;width:100%;border-radius:20px 20px 0 0;max-height:82%;overflow-y:auto;padding:0 0 20px;}
+.modal-handle{width:36px;height:4px;background:#E0E0E0;border-radius:2px;margin:10px auto 14px;}
+.modal-title{font-size:15px;font-weight:800;color:#000;padding:0 15px 10px;letter-spacing:-.01em;}
+.modal-close{position:absolute;top:12px;right:14px;width:26px;height:26px;border-radius:50%;background:#F5F5F5;display:flex;align-items:center;justify-content:center;font-size:12px;cursor:pointer;color:#666;}
+
+/* ═══════════════════════════
+   HEADOUT DESIGN SYSTEM
+═══════════════════════════ */
+.hero{width:100%;height:210px;position:relative;overflow:hidden;flex-shrink:0;}
+.hero-bg{position:absolute;inset:0;background-size:cover;background-position:center;transition:background .4s;}
+.hero-overlay{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0) 40%,rgba(0,0,0,.55) 100%);}
+.hero-bar{position:absolute;bottom:12px;left:14px;right:14px;display:flex;align-items:flex-end;justify-content:space-between;z-index:2;}
+.hero-city{font-size:22px;font-weight:900;color:#fff;display:flex;align-items:center;gap:5px;cursor:pointer;text-shadow:0 1px 8px rgba(0,0,0,.4);letter-spacing:-.02em;}
+.hero-help{width:28px;height:28px;border-radius:50%;border:1.5px solid rgba(255,255,255,.5);display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;backdrop-filter:blur(4px);background:rgba(255,255,255,.1);}
+
+.float-search{margin:-17px 12px 11px;position:relative;z-index:4;display:flex;align-items:center;gap:7px;background:#fff;border:1px solid #E0E0E0;border-radius:22px;padding:9px 13px;font-size:13px;color:#bbb;box-shadow:0 3px 12px rgba(0,0,0,.1);}
+
+.sec-label{font-size:16px;font-weight:800;color:#000;padding:2px 13px 9px;letter-spacing:-.01em;}
+
+/* DAYMIND card */
+.dm-card{margin:0 13px 14px;border-radius:14px;overflow:hidden;border:2px solid #7B00FF;}
+.dm-hd{background:linear-gradient(135deg,#7B00FF,#4A00AA);padding:12px 14px 10px;}
+.dm-ey{display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,.16);border-radius:18px;padding:2px 8px;font-size:9px;font-weight:700;color:#fff;margin-bottom:6px;letter-spacing:.04em;}
+.dm-t{font-size:14px;font-weight:800;color:#fff;margin-bottom:2px;letter-spacing:-.01em;}
+.dm-s{font-size:10px;color:rgba(255,255,255,.6);}
+.dm-bd{padding:12px 13px;}
+
+.pbox{width:100%;min-height:75px;padding:10px 12px;border-radius:11px;border:1.5px solid #E0E0E0;font-size:12px;font-family:'Inter',sans-serif;color:#000;line-height:1.6;resize:none;outline:none;background:#FAFAFA;transition:border-color .15s;}
+.pbox:focus{border-color:#7B00FF;background:#fff;}
+.pbox::placeholder{color:#C8C8C8;}
+
+.ex-lbl{font-size:9px;font-weight:600;color:#ccc;margin:7px 0 4px;display:flex;align-items:center;gap:5px;}
+.ex-lbl::before,.ex-lbl::after{content:'';flex:1;height:1px;background:#F0F0F0;}
+.ex-chips{display:flex;flex-direction:column;gap:4px;margin-bottom:8px;}
+.ex-chip{padding:6px 10px;border-radius:9px;border:1px solid #EFEFEF;font-size:10px;color:#666;cursor:pointer;background:#FAFAFA;transition:all .15s;line-height:1.4;}
+.ex-chip:hover{border-color:#7B00FF;color:#5500CC;background:#F5F0FF;}
+.ex-chip strong{color:#000;font-weight:700;}
+
+.ftog{display:flex;align-items:center;justify-content:center;gap:4px;font-size:10px;color:#7B00FF;font-weight:600;cursor:pointer;padding:4px;margin-bottom:8px;}
+.fmode{display:none;margin-bottom:8px;}
+.fmode.show{display:block;}
+.fl{font-size:9px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;}
+.fi{width:100%;padding:8px 11px;border-radius:9px;border:1.5px solid #E8E8E8;font-size:12px;font-family:'Inter',sans-serif;background:#FAFAFA;color:#000;outline:none;margin-bottom:6px;}
+.fi:focus{border-color:#7B00FF;}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px;}
+.cw{display:flex;align-items:center;justify-content:space-between;padding:8px 11px;border-radius:9px;border:1.5px solid #E8E8E8;background:#FAFAFA;}
+.cwl{font-size:12px;color:#000;}
+.cwb{display:flex;align-items:center;gap:9px;}
+.cb{width:24px;height:24px;border-radius:50%;border:1.5px solid #E0E0E0;background:#fff;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#000;transition:all .15s;}
+.cb:hover{border-color:#7B00FF;color:#7B00FF;}
+.cv{font-size:13px;font-weight:700;min-width:16px;text-align:center;}
+.ichips{display:flex;gap:5px;flex-wrap:wrap;}
+.ich{padding:5px 10px;border-radius:14px;font-size:10px;font-weight:600;border:1.5px solid #E8E8E8;color:#666;cursor:pointer;transition:all .15s;}
+.ich.on{border-color:#7B00FF;color:#7B00FF;background:#F0E6FF;}
+
+.plan-btn{width:100%;padding:12px;border-radius:11px;background:#7B00FF;color:#fff;border:none;font-size:13px;font-weight:800;cursor:pointer;font-family:'Inter',sans-serif;letter-spacing:-.01em;transition:background .15s;}
+.plan-btn:hover{background:#6200CC;}
+.plan-note{text-align:center;font-size:9px;color:#ccc;margin-top:5px;}
+
+/* horizontal scroll cards */
+.hrow{display:flex;gap:7px;padding:0 13px 14px;overflow-x:auto;scrollbar-width:none;}
+.hrow::-webkit-scrollbar{display:none;}
+.hcard{width:120px;flex-shrink:0;border-radius:11px;border:1px solid #EFEFEF;overflow:hidden;cursor:pointer;background:#fff;transition:box-shadow .15s;}
+.hcard:hover{box-shadow:0 4px 12px rgba(0,0,0,.1);}
+.hcard-img{height:70px;display:flex;align-items:center;justify-content:center;font-size:28px;position:relative;}
+.hcard-bd{padding:5px 7px 7px;}
+.hrat{display:flex;align-items:center;gap:2px;margin-bottom:2px;}
+.hs{color:#E8195A;font-size:9px;}
+.hsc{font-size:9px;font-weight:700;color:#E8195A;}
+.hcc{font-size:8px;color:#ccc;}
+.hname{font-size:10px;font-weight:700;color:#000;line-height:1.3;margin-bottom:2px;}
+.hprice{font-size:10px;font-weight:700;color:#000;}
+.hbadge{font-size:7px;font-weight:700;background:#00A362;color:#fff;padding:1px 4px;border-radius:3px;margin-left:3px;}
+
+/* itinerary day cards */
+.irow{display:flex;gap:7px;padding:0 13px 14px;overflow-x:auto;scrollbar-width:none;}
+.irow::-webkit-scrollbar{display:none;}
+.icard{width:100px;height:80px;flex-shrink:0;border-radius:11px;padding:10px;position:relative;cursor:pointer;}
+.ic1{background:linear-gradient(135deg,#FFB0C8,#FF6888);}
+.ic3{background:linear-gradient(135deg,#B8A0FF,#8050FF);}
+.ic5{background:linear-gradient(135deg,#88D8A0,#50B068);}
+.icnum{font-size:26px;font-weight:900;color:rgba(255,255,255,.9);line-height:1;}
+.iclbl{font-size:8px;font-weight:700;color:rgba(255,255,255,.65);letter-spacing:.05em;}
+
+/* BUILD screen */
+.bwrap{min-height:100%;background:#fff;padding:15px 13px;}
+.bt{font-size:17px;font-weight:800;color:#000;margin-bottom:3px;letter-spacing:-.01em;}
+.bs{font-size:11px;color:#aaa;margin-bottom:10px;}
+.tpill-row{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:13px;}
+.tpill{font-size:9px;font-weight:600;padding:3px 8px;border-radius:8px;background:#F0E6FF;color:#5500CC;}
+.slist{display:flex;flex-direction:column;gap:0;margin-bottom:13px;}
+.srow{display:flex;gap:9px;align-items:flex-start;padding:8px 0;border-bottom:1px solid #F5F5F5;opacity:0;transform:translateY(5px);animation:fu .3s forwards;}
+.srow:nth-child(1){animation-delay:.05s;}
+.srow:nth-child(2){animation-delay:.5s;}
+.srow:nth-child(3){animation-delay:.95s;}
+.srow:nth-child(4){animation-delay:1.4s;}
+.srow:nth-child(5){animation-delay:1.8s;}
+@keyframes fu{to{opacity:1;transform:translateY(0);}}
+.sic{width:21px;height:21px;border-radius:50%;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:9px;}
+.sic.done{background:#E8FFF4;color:#00A362;border:1.5px solid #B0E8C8;font-size:10px;}
+.sic.doing{background:#F0E6FF;color:#7B00FF;border:1.5px solid #C090FF;font-weight:700;}
+.st{font-size:11px;font-weight:700;color:#000;margin-bottom:1px;}
+.ss{font-size:9px;color:#aaa;}
+.prev-card{background:#000;border-radius:13px;padding:12px;margin-bottom:12px;opacity:0;animation:fu .4s 2.1s forwards;}
+.plbl{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.3);margin-bottom:7px;}
+.prow{display:flex;gap:7px;align-items:flex-start;padding:3px 0;}
+.ptm{font-size:9px;color:rgba(255,255,255,.3);width:30px;flex-shrink:0;}
+.pdot{width:6px;height:6px;border-radius:50%;background:#7B00FF;margin-top:4px;flex-shrink:0;}
+.pdot.r{background:#E8195A;}
+.pn{font-size:11px;font-weight:600;color:#fff;}
+.pm{font-size:9px;color:rgba(255,255,255,.3);}
+.pline{width:1px;height:7px;background:rgba(255,255,255,.08);margin-left:2px;}
+.see-btn{width:100%;padding:12px;border-radius:11px;background:#7B00FF;color:#fff;border:none;font-size:12px;font-weight:800;cursor:pointer;font-family:'Inter',sans-serif;opacity:0;animation:fu .3s 2.4s forwards;transition:background .15s;}
+.see-btn:hover{background:#6200CC;}
+
+/* ITINERARY screen */
+.itwrap{min-height:100%;background:#fff;}
+.ithead{background:#000;padding:12px 13px 11px;}
+.itback{font-size:10px;color:rgba(255,255,255,.4);cursor:pointer;margin-bottom:6px;display:inline-flex;align-items:center;gap:3px;}
+.ittitle{font-size:16px;font-weight:800;color:#fff;letter-spacing:-.01em;margin-bottom:5px;}
+.ittags{display:flex;gap:4px;flex-wrap:wrap;}
+.ittag{font-size:9px;font-weight:600;padding:2px 7px;border-radius:7px;background:rgba(255,255,255,.1);color:rgba(255,255,255,.75);}
+.statbar{display:flex;background:#F8F8F8;border-bottom:1px solid #EFEFEF;}
+.stit{flex:1;padding:7px 4px;text-align:center;border-right:1px solid #EFEFEF;}
+.stit:last-child{border:none;}
+.stv{font-size:13px;font-weight:800;color:#000;}
+.stl{font-size:8px;color:#bbb;margin-top:1px;}
+.dtabs{display:flex;gap:4px;padding:9px 13px 6px;overflow-x:auto;scrollbar-width:none;}
+.dtabs::-webkit-scrollbar{display:none;}
+.dtab{padding:5px 12px;border-radius:16px;font-size:11px;font-weight:600;cursor:pointer;border:1.5px solid #E8E8E8;color:#888;white-space:nowrap;transition:all .15s;}
+.dtab.on{background:#7B00FF;color:#fff;border-color:#7B00FF;}
+
+/* ADD button in day tabs area */
+.add-exp-btn{padding:5px 12px;border-radius:16px;font-size:11px;font-weight:700;cursor:pointer;border:1.5px dashed #7B00FF;color:#7B00FF;white-space:nowrap;background:transparent;flex-shrink:0;}
+
+/* timeline */
+.tl{padding:7px 13px 0;}
+.tlrow{display:flex;gap:8px;margin-bottom:9px;}
+.tll{display:flex;flex-direction:column;align-items:center;width:38px;flex-shrink:0;}
+.tlt{font-size:9px;color:#bbb;font-weight:600;margin-bottom:3px;white-space:nowrap;}
+.tld{width:8px;height:8px;border-radius:50%;background:#7B00FF;flex-shrink:0;}
+.tld.r{background:#E8195A;}
+.tlvl{flex:1;width:1px;background:#EFEFEF;margin-top:2px;}
+.tlcard{flex:1;background:#fff;border:1px solid #EFEFEF;border-radius:11px;overflow:hidden;transition:box-shadow .15s;}
+.tlcard.free{background:#FAFAFA;border-style:dashed;}
+.tlcard-img{height:65px;display:flex;align-items:center;justify-content:center;font-size:28px;position:relative;}
+.tlbadges{position:absolute;top:5px;left:5px;display:flex;gap:3px;flex-wrap:wrap;}
+.tlb{font-size:7px;font-weight:700;padding:2px 5px;border-radius:4px;background:rgba(0,0,0,.6);color:#fff;white-space:nowrap;}
+.tlb.gr{background:#00A362;}.tlb.rd{background:#E8195A;}
+.tlbody{padding:6px 9px 8px;}
+.tlname{font-size:11px;font-weight:700;color:#000;margin-bottom:2px;line-height:1.3;}
+.tlsub{font-size:9px;color:#aaa;margin-bottom:4px;line-height:1.4;}
+.cohort{background:#F5F0FF;border-radius:7px;padding:5px 8px;margin-bottom:4px;font-size:9px;color:#5500CC;font-weight:600;line-height:1.5;}
+.cohort .cn{font-weight:800;color:#7B00FF;}
+.tlfoot{display:flex;align-items:center;justify-content:space-between;}
+.tlrat{display:flex;align-items:center;gap:2px;}
+.tlstar{color:#E8195A;font-size:9px;}
+.tlsc{font-size:9px;font-weight:700;color:#E8195A;}
+.tlprice{font-size:11px;font-weight:800;color:#000;}
+.act-btns{display:flex;gap:4px;}
+.swap-btn{font-size:8px;font-weight:700;color:#7B00FF;padding:3px 7px;border:1px solid #DDD0FF;border-radius:5px;background:#F5F0FF;cursor:pointer;transition:all .15s;}
+.swap-btn:hover{background:#E8D8FF;}
+.edit-btn{font-size:8px;font-weight:700;color:#555;padding:3px 7px;border:1px solid #E8E8E8;border-radius:5px;background:#FAFAFA;cursor:pointer;}
+.rem-btn{font-size:8px;font-weight:700;color:#E8195A;padding:3px 7px;border:1px solid #FFD8E4;border-radius:5px;background:#FFF0F4;cursor:pointer;}
+.walkrow{display:flex;align-items:center;gap:5px;padding:1px 0 6px 46px;}
+.walkdash{flex:0 0 20px;border-top:1px dashed #DDD;}
+.walktxt{font-size:8px;color:#bbb;}
+
+/* BOOK BAR */
+.bookbar{background:#fff;border-top:1px solid #EFEFEF;padding:8px 13px;}
+.bookinner{background:#000;border-radius:11px;padding:9px 12px;display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+.bil .bit{font-size:10px;font-weight:700;color:#fff;}
+.bil .bis{font-size:8px;color:rgba(255,255,255,.4);}
+.bir .bilbl{font-size:8px;color:rgba(255,255,255,.4);text-align:right;}
+.bir .bival{font-size:15px;font-weight:800;color:#fff;}
+.bookbtn{width:100%;padding:12px;border-radius:11px;background:#7B00FF;color:#fff;border:none;font-size:12px;font-weight:800;cursor:pointer;font-family:'Inter',sans-serif;transition:background .15s;margin-bottom:4px;}
+.bookbtn:hover{background:#6200CC;}
+.booknote{text-align:center;font-size:8px;color:#bbb;}
+
+/* PAYMENT */
+.paywrap{min-height:100%;background:#fff;}
+.payhead{background:#000;padding:12px 13px;display:flex;align-items:center;gap:9px;}
+.payback{width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;color:#fff;}
+.payht{font-size:13px;font-weight:700;color:#fff;}
+.payhs{font-size:9px;color:rgba(255,255,255,.4);}
+.paybody{padding:12px 13px;}
+.psec{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#bbb;margin:0 0 6px;}
+.psec.mt{margin-top:12px;}
+.mrow{display:flex;align-items:center;gap:8px;padding:7px 10px;background:#FAFAFA;border-radius:9px;border:1px solid #EFEFEF;margin-bottom:5px;}
+.mav{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;background:#F0E6FF;flex-shrink:0;}
+.mname{font-size:11px;font-weight:600;color:#000;flex:1;}
+.mbadge{font-size:8px;font-weight:700;padding:2px 6px;border-radius:7px;background:#E8FFF4;color:#00A362;border:1px solid #B0E8C8;}
+.mamt{font-size:11px;font-weight:700;color:#000;}
+.splitnote{background:#F0E6FF;border-radius:8px;padding:7px 10px;font-size:10px;color:#5500CC;margin-bottom:5px;line-height:1.5;}
+.obox{background:#F8F8F8;border-radius:11px;padding:10px;margin-bottom:9px;}
+.orow{display:flex;justify-content:space-between;font-size:10px;padding:3px 0;border-bottom:1px solid #EFEFEF;}
+.orow:last-child{border:none;}
+.oname{color:#555;}.oval{font-weight:700;color:#000;}
+.ototal{display:flex;justify-content:space-between;padding:7px 0 3px;border-top:2px solid #000;margin-top:3px;}
+.otl{font-size:12px;font-weight:700;}.otv{font-size:13px;font-weight:800;}
+.inclnote{font-size:9px;color:#00A362;font-weight:600;text-align:right;margin-bottom:10px;}
+.exprow{display:flex;gap:5px;margin-bottom:8px;}
+.expb{flex:1;padding:8px;border-radius:9px;border:1px solid #E8E8E8;font-size:10px;font-weight:700;cursor:pointer;text-align:center;background:#fff;transition:all .15s;}
+.expb.dark{background:#000;color:#fff;border-color:#000;}
+.orr{display:flex;align-items:center;gap:6px;margin-bottom:8px;}
+.orl{flex:1;height:1px;background:#EFEFEF;}
+.ort{font-size:9px;color:#ccc;}
+.pinp{width:100%;padding:8px 11px;border-radius:9px;border:1.5px solid #E8E8E8;font-size:11px;font-family:'Inter',sans-serif;margin-bottom:6px;background:#FAFAFA;}
+.pinp:focus{outline:none;border-color:#7B00FF;background:#fff;}
+.pr{display:flex;gap:6px;}
+.pr .pinp{flex:1;}
+.sslr{font-size:9px;color:#bbb;display:flex;align-items:center;gap:3px;margin-bottom:10px;}
+.paybtn{width:100%;padding:12px;border-radius:11px;background:#7B00FF;color:#fff;border:none;font-size:12px;font-weight:800;cursor:pointer;font-family:'Inter',sans-serif;transition:background .15s;margin-bottom:5px;}
+.paybtn:hover{background:#6200CC;}
+.payg{text-align:center;font-size:9px;color:#bbb;padding-bottom:12px;}
+
+/* CONFIRMED */
+.conwrap{min-height:100%;background:#fff;}
+.conhero{background:linear-gradient(135deg,#00A362,#007040);padding:20px 14px 16px;text-align:center;}
+.conem{font-size:36px;margin-bottom:6px;}
+.cont{font-size:18px;font-weight:800;color:#fff;margin-bottom:2px;}
+.cons{font-size:10px;color:rgba(255,255,255,.7);}
+.conref{font-size:9px;color:rgba(255,255,255,.45);margin-top:4px;font-family:monospace;}
+.conbody{padding:12px 13px;}
+.recap{background:#F8F8F8;border-radius:11px;padding:10px;margin-bottom:10px;}
+.reclbl{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#bbb;margin-bottom:6px;}
+.recrow{display:flex;gap:6px;padding:4px 0;border-bottom:1px solid #EFEFEF;align-items:flex-start;}
+.recrow:last-child{border:none;}
+.rectm{font-size:8px;color:#bbb;width:30px;flex-shrink:0;padding-top:1px;}
+.recname{font-size:10px;font-weight:600;color:#000;}
+.recprice{font-size:9px;color:#7B00FF;font-weight:600;}
+.splitrec{background:#F8F8F8;border-radius:11px;padding:10px;margin-bottom:10px;}
+.srrow{display:flex;justify-content:space-between;font-size:10px;padding:2px 0;}
+.srnm{color:#888;}.srv{font-weight:700;color:#000;}.srv.p{color:#7B00FF;}
+.nextcard{background:#7B00FF;border-radius:12px;padding:12px;margin-bottom:12px;}
+.ncev{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.4);margin-bottom:4px;}
+.nct{font-size:13px;font-weight:800;color:#fff;margin-bottom:2px;}
+.ncs{font-size:10px;color:rgba(255,255,255,.55);margin-bottom:8px;}
+.ncbtn{width:100%;padding:8px;border-radius:8px;background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.2);font-size:10px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;}
+.sharecard{border:1.5px solid #EFEFEF;border-radius:12px;padding:14px;margin-bottom:20px;}
+.share-lbl{font-size:13px;font-weight:800;color:#000;margin-bottom:2px;}
+.share-sub{font-size:11px;color:#aaa;margin-bottom:12px;}
+.share-btns{display:flex;gap:7px;}
+.share-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:9px 6px;border-radius:9px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;border:1.5px solid;transition:all .15s;}
+.share-btn.wa{background:#E8FFF2;color:#00A362;border-color:#B0E8C8;}
+.share-btn.wa:hover{background:#00A362;color:#fff;}
+.share-btn.copy{background:#F0E6FF;color:#7B00FF;border-color:#D0B8FF;}
+.share-btn.copy:hover{background:#7B00FF;color:#fff;}
+.share-btn.dl{background:#F5F5F5;color:#444;border-color:#E0E0E0;}
+.share-btn.dl:hover{background:#333;color:#fff;border-color:#333;}
+.share-toast{margin-top:10px;padding:8px 12px;background:#000;color:#fff;border-radius:8px;font-size:11px;font-weight:600;text-align:center;animation:fu .2s ease;}
+
+/* MODAL content */
+.alt-card{display:flex;gap:9px;padding:10px 15px;border-bottom:1px solid #F5F5F5;cursor:pointer;transition:background .15s;align-items:center;}
+.alt-card:hover{background:#FAFAFA;}
+.alt-em{font-size:26px;width:42px;height:42px;background:#F5F5F5;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.alt-info{flex:1;}
+.alt-name{font-size:12px;font-weight:700;color:#000;margin-bottom:2px;}
+.alt-sub{font-size:10px;color:#aaa;line-height:1.4;}
+.alt-foot{display:flex;align-items:center;justify-content:space-between;margin-top:4px;}
+.alt-rat{font-size:10px;font-weight:700;color:#E8195A;}
+.alt-price{font-size:12px;font-weight:800;color:#000;}
+.alt-sel{padding:5px 12px;border-radius:8px;background:#7B00FF;color:#fff;border:none;font-size:10px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;}
+.add-card{display:flex;gap:9px;padding:9px 15px;border-bottom:1px solid #F5F5F5;cursor:pointer;transition:background .15s;align-items:center;}
+.add-card:hover{background:#FAFAFA;}
+.add-em{font-size:22px;width:38px;height:38px;background:#F5F5F5;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.add-plus{width:38px;height:38px;background:#F0E6FF;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px;color:#7B00FF;}
+.add-info{flex:1;}
+.add-name{font-size:11px;font-weight:700;color:#000;margin-bottom:1px;}
+.add-sub{font-size:9px;color:#aaa;}
+.add-price{font-size:10px;font-weight:700;color:#7B00FF;}
+.add-selb{padding:4px 10px;border-radius:7px;background:#F0E6FF;color:#7B00FF;border:1px solid #DDD0FF;font-size:9px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;}
+
+/* edit modal */
+.edit-field{width:100%;padding:9px 12px;border-radius:9px;border:1.5px solid #E8E8E8;font-size:12px;font-family:'Inter',sans-serif;background:#FAFAFA;margin-bottom:8px;}
+.edit-field:focus{outline:none;border-color:#7B00FF;}
+.edit-save{width:100%;padding:11px;border-radius:10px;background:#7B00FF;color:#fff;border:none;font-size:12px;font-weight:800;cursor:pointer;font-family:'Inter',sans-serif;}
+
+/* PAYMENT TABS */
+.pay-tabs{display:flex;gap:4px;margin-bottom:12px;}
+.pay-tab{flex:1;padding:9px 4px;border-radius:10px;font-size:10px;font-weight:700;text-align:center;cursor:pointer;border:1.5px solid #E8E8E8;color:#888;transition:all .15s;background:#fff;}
+.pay-tab.on{border-color:#7B00FF;color:#7B00FF;background:#F5F0FF;}
+
+/* LEFT SIDEBAR NAV */
+#sidenav{width:200px;flex-shrink:0;background:#fff;border-right:1px solid #EFEFEF;padding:16px 0;overflow-y:auto;height:100%;}
+.snav-section{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#ccc;padding:0 16px 6px;margin-top:12px;}
+.snav-section:first-child{margin-top:0;}
+.snav-item{display:flex;align-items:center;gap:9px;padding:9px 16px;cursor:pointer;transition:all .15s;border-radius:0;font-size:12px;font-weight:600;color:#666;}
+.snav-item:hover{background:#F8F8F8;color:#000;}
+.snav-item.on{background:#F0E6FF;color:#7B00FF;border-right:3px solid #7B00FF;}
+.snav-item .sni{font-size:16px;width:22px;text-align:center;}
+.snav-item .snl{flex:1;}
+.snav-item .snbadge{font-size:8px;font-weight:700;background:#7B00FF;color:#fff;padding:1px 5px;border-radius:4px;}
+.snav-divider{height:1px;background:#F5F5F5;margin:8px 16px;}
+#stage-wrap{display:flex;flex:1;overflow:hidden;position:relative;background:#E8E8ED;}
+#stage{flex:1;display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;overflow-x:hidden;position:relative;padding:20px 20px 40px;margin-left:200px;}
+#stage::-webkit-scrollbar{width:5px;}
+#stage::-webkit-scrollbar-thumb{background:#E8E8E8;border-radius:3px;}
+#ov{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;opacity:0;pointer-events:none;transition:opacity .25s;}
+#ov.open{opacity:1;pointer-events:all;}
+#drawer{position:fixed;top:48px;right:0;bottom:0;width:560px;max-width:96vw;background:#fff;z-index:300;border-left:1px solid #EFEFEF;transform:translateX(100%);transition:transform .28s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;}
+#drawer.open{transform:translateX(0);}
+.dh{padding:22px 28px 16px;border-bottom:1px solid #F0F0F0;display:flex;align-items:flex-start;justify-content:space-between;flex-shrink:0;}
+.dh-l h3{font-size:16px;font-weight:800;color:#000;margin-bottom:4px;letter-spacing:-.01em;}
+.dh-l p{font-size:12px;color:#aaa;line-height:1.5;}
+.dx{width:30px;height:30px;border-radius:50%;border:1px solid #E8E8E8;background:#F5F5F5;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:#888;flex-shrink:0;}
+.db{flex:1;overflow-y:auto;padding:24px 28px 40px;}
+.ds{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#bbb;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #F0F0F0;}
+.dblk{margin-bottom:32px;}
+.dp{font-size:13px;color:#555;line-height:1.85;margin-bottom:10px;}
+.dp strong{color:#000;font-weight:700;}
+.dp em{color:#7B00FF;font-style:normal;font-weight:600;}
+.dsg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
+.dsc{background:#FAFAFA;border:1px solid #EFEFEF;border-radius:10px;padding:14px 16px;}
+.dsv{font-size:22px;font-weight:900;line-height:1;margin-bottom:4px;}
+.dsv.p{color:#7B00FF;}.dsv.r{color:#E8195A;}.dsv.g{color:#00A362;}
+.dsl{font-size:11px;color:#666;margin-top:4px;line-height:1.4;}
+.dss{font-size:10px;color:#bbb;margin-top:2px;}
+.dins{background:#F5F0FF;border:1px solid rgba(123,0,255,.2);border-radius:10px;padding:16px 18px;margin-bottom:14px;}
+.dins-t{font-size:13px;font-weight:700;color:#7B00FF;margin-bottom:6px;}
+.dins-b{font-size:12px;color:#555;line-height:1.75;}
+.dchg{border-left:3px solid #7B00FF;padding:10px 14px 10px 16px;margin-bottom:10px;border-radius:0 8px 8px 0;background:#F8F5FF;}
+.dchg-t{font-size:13px;font-weight:700;color:#4400AA;margin-bottom:5px;}
+.dchg-w{font-size:12px;color:#666;line-height:1.7;}
+.dno{border-left:3px solid #E8195A;padding:10px 14px 10px 16px;margin-bottom:8px;border-radius:0 8px 8px 0;background:#FFF5F7;}
+.dno-t{font-size:13px;font-weight:700;color:#B00030;margin-bottom:4px;}
+.dno-b{font-size:12px;color:#888;line-height:1.6;}
+.dno-m{font-size:11px;color:#7B00FF;margin-top:5px;font-weight:600;}
+.dest{background:#F0FFF7;border:1px solid rgba(0,163,98,.2);border-radius:10px;padding:14px 16px;margin-bottom:10px;}
+.dest-t{font-size:13px;font-weight:700;color:#007040;margin-bottom:5px;}
+.dest-b{font-size:12px;color:#555;line-height:1.7;}
+.dest-r{font-size:11px;color:#00A362;font-weight:600;margin-top:5px;}
+.dbullets{list-style:none;padding:0;margin:10px 0 0;display:flex;flex-direction:column;gap:10px;}
+.dbullets li{font-size:13px;color:#555;line-height:1.7;padding-left:18px;position:relative;}
+.dbullets li::before{content:'→';position:absolute;left:0;color:#7B00FF;font-weight:700;}
+.dbullets li strong{color:#000;}
+.dbullets li em{color:#7B00FF;font-style:normal;font-weight:600;}
+</style>
+</head>
+<body>
+<div id="root">
+
+<div id="topbar">
+  <div class="tb-logo">headout</div>
+  <div class="tb-div"></div>
+  <div style="font-size:11px;font-weight:600;color:#aaa;">DayMind AI Planner · Interactive Prototype</div>
+  <div class="tb-r">
+    <div class="why-btn" id="wbtn" onclick="toggleDrawer()">ⓘ Product thinking</div>
+  </div>
+</div>
+
+<div id="stage-wrap">
+
+<div id="sidenav">
+  <div class="snav-section">Flow</div>
+  <div class="snav-item on" data-s="0" onclick="navTo(0)"><span class="sni">🏠</span><span class="snl">Landing page</span></div>
+  <div class="snav-item" data-s="1" onclick="navTo(1)"><span class="sni">⚡</span><span class="snl">AI building</span></div>
+  <div class="snav-item" data-s="2" onclick="navTo(2)"><span class="sni">📋</span><span class="snl">Verify plan</span></div>
+  <div class="snav-item" data-s="3" onclick="navTo(3)"><span class="sni">💳</span><span class="snl">Payment</span></div>
+  <div class="snav-item" data-s="4" onclick="navTo(4)"><span class="sni">✅</span><span class="snl">Confirmed</span></div>
+  <div class="snav-divider"></div>
+  <div class="snav-section">Try a city</div>
+  <div class="snav-item" onclick="tryCity('rome')"><span class="sni">🏛️</span><span class="snl">Rome</span></div>
+  <div class="snav-item" onclick="tryCity('seoul')"><span class="sni">🏯</span><span class="snl">Seoul</span></div>
+  <div class="snav-item" onclick="tryCity('paris')"><span class="sni">🗼</span><span class="snl">Paris</span></div>
+  <div class="snav-item" onclick="tryCity('barcelona')"><span class="sni">🏖️</span><span class="snl">Barcelona</span></div>
+  <div class="snav-divider"></div>
+  <div class="snav-section">Try a group</div>
+  <div class="snav-item" onclick="tryGroup(1,'Solo')"><span class="sni">🙋</span><span class="snl">Solo</span></div>
+  <div class="snav-item" onclick="tryGroup(2,'Couple')"><span class="sni">💑</span><span class="snl">2 people</span></div>
+  <div class="snav-item" onclick="tryGroup(4,'Group of 4')"><span class="sni">👥</span><span class="snl">Group of 4</span></div>
+  <div class="snav-item" onclick="tryGroup(8,'Large group')"><span class="sni">🎉</span><span class="snl">Group of 8</span></div>
+</div>
+
+<div id="stage">
+  <div id="phone">
+    <div class="sb"><div class="sb-t" id="sbt">13:14</div><div class="sb-r">▲◉▮▮</div></div>
+    <div id="scr"></div>
+    <div class="bnav">
+      <div class="bni on"><div class="bni-ic">🧭</div><div class="bni-lb">Explore</div></div>
+      <div class="bni"><div class="bni-ic">🎫</div><div class="bni-lb">Bookings</div></div>
+      <div class="bni"><div class="bni-ic">👤</div><div class="bni-lb">Account</div></div>
+    </div>
+  </div>
+</div>
+
+<div id="ov" onclick="closeDrawer()"></div>
+<div id="drawer">
+  <div class="dh">
+    <div class="dh-l">
+      <h3>DayMind — Product Thinking</h3>
+      <p>The why behind every decision in this prototype</p>
+    </div>
+    <div class="dx" onclick="closeDrawer()">✕</div>
+  </div>
+  <div class="db">
+
+    <div class="dblk">
+      <div class="ds">The core insight</div>
+      <div class="dins">
+        <div class="dins-t">⚡ Users plan in ChatGPT. They transact in Headout. We're a checkout terminal.</div>
+        <div class="dins-b">16 hours of planning happens outside Headout across 141 browser tabs. When ChatGPT adds native booking — which is inevitable — Headout loses both the planning relationship and the transaction in one move. DayMind recaptures the planning layer.</div>
+      </div>
+      <div class="dsg">
+        <div class="dsc"><div class="dsv r">16h</div><div class="dsl">Avg planning time per trip</div><div class="dss">Priceline / Harris Poll 2024</div></div>
+        <div class="dsc"><div class="dsv r">141</div><div class="dsl">Pages visited before booking</div><div class="dss">OAG / Deloitte 2024</div></div>
+        <div class="dsc"><div class="dsv p">>50%</div><div class="dsl">Travellers already use AI to plan</div><div class="dss">McKinsey / OAG 2025</div></div>
+        <div class="dsc"><div class="dsv r">40%</div><div class="dsl">Gen Z arrive exhausted from planning</div><div class="dss">Priceline 2024</div></div>
+      </div>
+    </div>
+
+    <div class="dblk">
+      <div class="ds">Why free text beats filters</div>
+      <div class="dp">Filters capture what users <strong>can articulate.</strong> Free text captures what they <strong>actually think.</strong></div>
+      <div class="dp">"Not too tiring but not too relaxed" is a real constraint that shapes the entire day plan. It is <em>unrepresentable in any dropdown.</em></div>
+      <div class="dchg">
+        <div class="dchg-t">Filter toggle = safety valve, not equal option</div>
+        <div class="dchg-w">Free text is primary. Giving both equal weight is refusing to make a product decision.</div>
+      </div>
+      <div class="dchg">
+        <div class="dchg-t">Prompts are a data moat</div>
+        <div class="dchg-w">10,000 prompts and you learn: "cultural" = Vatican + Borghese, not Colosseum. "Not tiring" = max 3 walking stops/day. Filter dropdowns give selections. Prompts give intent data.</div>
+      </div>
+    </div>
+
+    <div class="dblk">
+      <div class="ds">Why cohort-matched social proof</div>
+      <div class="dp">AI creates a trust gap that generic star ratings don't close. Four reasons:</div>
+      <ul class="dbullets">
+        <li><strong>Search gives agency. AI removes it.</strong> When users pick themselves, they feel ownership. When AI picks, the instinct is — did it understand <em>me</em>, or just surface something popular?</li>
+        <li><strong>"4.4 stars" doesn't answer the right question.</strong> It proves quality. It doesn't prove fit. "1,200 groups of 4 on adventure trips booked this" proves fit.</li>
+        <li><strong>The proof should mirror what they told the AI.</strong> Mentioned group size → show group match. Mentioned interests → show interest match. Never all three at once — that reads as noise.</li>
+        <li><strong>Headout already has this data.</strong> It's a query on existing bookings, not new infrastructure. Low cost, high trust impact.</li>
+      </ul>
+    </div>
+
+    <div class="dblk">
+      <div class="ds">Explicitly not in v1</div>
+      <div class="dno">
+        <div class="dno-t">Hotels, flights, transport booking</div>
+        <div class="dno-b">Experiences only. Don't compete with Booking.com on their turf.</div>
+        <div class="dno-m">↳ Show walking time. Don't offer to book the taxi.</div>
+      </div>
+      <div class="dno">
+        <div class="dno-t">Blank prompt box with no scaffolding</div>
+        <div class="dno-b">Cold-start problem. First-time users don't know what the AI can handle. Example prompts calibrate expectations without removing freedom.</div>
+        <div class="dno-m">↳ Examples as editable templates. One tap to populate, easy to change.</div>
+      </div>
+    </div>
+
+  </div>
+
+</div><!-- /stage -->
+</div><!-- /stage-wrap -->
+
+<script>
+/* ═══════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════ */
+let curS=0, drawerOpen=false, filterMode=false;
+let travellers=4, days=3, interests=['Adventure'];
+let userPrompt='';
+let activeDay=0; // which day tab is selected
+let activeModal=null; // 'swap','add','edit'
+let swapTarget=null; // index of experience being swapped
+let editTarget=null;
+
+/* City database — drives hero image emoji, colour, name, experiences */
+// City hero backgrounds — rich CSS using layered gradients + shapes, zero network dependency
+const CITY_BG={
+  rome:'linear-gradient(175deg,#8B6343 0%,#6B4423 25%,#4A2E18 55%,#2A1A08 100%)',
+  seoul:'linear-gradient(175deg,#4A7AAA 0%,#2A5080 30%,#152840 65%,#080E1A 100%)',
+  paris:'linear-gradient(175deg,#9B88BC 0%,#6B5890 30%,#3D3060 65%,#1A1228 100%)',
+  barcelona:'linear-gradient(175deg,#C8943A 0%,#9A6420 30%,#6A3E10 65%,#301808 100%)',
+};
+
+// Inline SVG skylines — zero network, each city looks distinct
+const CITY_SVG={
+  rome:`<svg style="position:absolute;inset:0;width:100%;height:100%" viewBox="0 0 375 210" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+  <!-- Sky gradient -->
+  <defs>
+    <linearGradient id="rsky" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#E8C090"/><stop offset="50%" stop-color="#C07840"/><stop offset="100%" stop-color="#6A3010"/></linearGradient>
+    <linearGradient id="rsun" cx="50%" cy="50%" r="50%" fx="50%" fy="50%"><stop offset="0%" stop-color="#FFE080"/><stop offset="100%" stop-color="#FF9020" stop-opacity="0"/></linearGradient>
+  </defs>
+  <rect width="375" height="210" fill="url(#rsky)"/>
+  <!-- Sun -->
+  <circle cx="280" cy="60" r="35" fill="#FFD060" opacity=".6"/>
+  <circle cx="280" cy="60" r="55" fill="#FF9020" opacity=".2"/>
+  <!-- Distant hills -->
+  <ellipse cx="180" cy="200" rx="300" ry="80" fill="#5A2E10" opacity=".7"/>
+  <!-- Colosseum silhouette -->
+  <g fill="#3A1808" opacity=".9">
+    <rect x="90" y="105" width="130" height="75"/>
+    <!-- Arches -->
+    <rect x="90" y="105" width="130" height="75" fill="#2A1008"/>
+    <path d="M95 180 L95 130 Q105 115 115 130 L115 180Z" fill="#5A2E10"/>
+    <path d="M118 180 L118 130 Q128 115 138 130 L138 180Z" fill="#5A2E10"/>
+    <path d="M141 180 L141 130 Q151 115 161 130 L161 180Z" fill="#5A2E10"/>
+    <path d="M164 180 L164 130 Q174 115 184 130 L184 180Z" fill="#5A2E10"/>
+    <path d="M187 180 L187 130 Q197 115 207 130 L207 180Z" fill="#5A2E10"/>
+    <!-- Top tier -->
+    <rect x="100" y="90" width="110" height="20"/>
+    <rect x="110" y="75" width="90" height="20"/>
+    <!-- Windows upper -->
+    <path d="M115 95 L115 78 Q120 72 125 78 L125 95Z" fill="#8B5030" opacity=".6"/>
+    <path d="M135 95 L135 78 Q140 72 145 78 L145 95Z" fill="#8B5030" opacity=".6"/>
+    <path d="M155 95 L155 78 Q160 72 165 78 L165 95Z" fill="#8B5030" opacity=".6"/>
+    <path d="M175 95 L175 78 Q180 72 185 78 L185 95Z" fill="#8B5030" opacity=".6"/>
+  </g>
+  <!-- Dome/Pantheon far right -->
+  <g fill="#2A1008" opacity=".7">
+    <rect x="270" y="135" width="60" height="55"/>
+    <ellipse cx="300" cy="135" rx="35" ry="20" fill="#2A1008"/>
+    <ellipse cx="300" cy="128" rx="22" ry="14"/>
+  </g>
+  <!-- Pine trees -->
+  <g fill="#1A3010" opacity=".8">
+    <ellipse cx="60" cy="155" rx="12" ry="25"/><rect x="57" y="170" width="6" height="20"/>
+    <ellipse cx="250" cy="160" rx="10" ry="20"/><rect x="247" y="172" width="6" height="18"/>
+    <ellipse cx="40" cy="165" rx="9" ry="18"/>
+  </g>
+  <!-- Ground -->
+  <rect x="0" y="185" width="375" height="25" fill="#2A1008" opacity=".8"/>
+</svg>`,
+
+  seoul:`<svg style="position:absolute;inset:0;width:100%;height:100%" viewBox="0 0 375 210" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="ssky" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#0A1A3A"/><stop offset="60%" stop-color="#1A3A6A"/><stop offset="100%" stop-color="#2A5A9A"/></linearGradient>
+  </defs>
+  <rect width="375" height="210" fill="url(#ssky)"/>
+  <!-- Moon -->
+  <circle cx="310" cy="45" r="22" fill="#E8E0C0" opacity=".9"/>
+  <circle cx="320" cy="38" r="20" fill="#1A3060" opacity=".9"/>
+  <!-- Stars -->
+  <circle cx="50" cy="30" r="1.5" fill="white" opacity=".8"/>
+  <circle cx="80" cy="20" r="1" fill="white" opacity=".7"/>
+  <circle cx="130" cy="15" r="1.5" fill="white" opacity=".6"/>
+  <circle cx="200" cy="25" r="1" fill="white" opacity=".8"/>
+  <circle cx="240" cy="10" r="1.5" fill="white" opacity=".7"/>
+  <circle cx="170" cy="40" r="1" fill="white" opacity=".5"/>
+  <!-- N Seoul Tower on Namsan -->
+  <g fill="#0A1828">
+    <!-- Namsan hill -->
+    <ellipse cx="290" cy="175" rx="70" ry="45"/>
+    <!-- Tower base -->
+    <rect x="280" y="100" width="18" height="70"/>
+    <!-- Tower body tapered -->
+    <polygon points="275,100 305,100 298,70 282,70" fill="#0A1828"/>
+    <!-- Tower top ball -->
+    <ellipse cx="289" cy="68" rx="12" ry="9"/>
+    <!-- Antenna -->
+    <line x1="289" y1="59" x2="289" y2="35" stroke="#0A1828" stroke-width="3"/>
+    <!-- Observation deck lights -->
+    <rect x="278" y="80" width="22" height="6" fill="#FFD080" opacity=".8" rx="2"/>
+  </g>
+  <!-- City skyline buildings -->
+  <g fill="#0D2040" opacity=".95">
+    <rect x="10" y="130" width="22" height="70"/>
+    <rect x="35" y="115" width="18" height="85"/>
+    <rect x="56" y="120" width="25" height="80"/>
+    <rect x="84" y="105" width="20" height="95"/>
+    <rect x="107" y="95" width="28" height="105"/>
+    <rect x="138" y="110" width="22" height="90"/>
+    <rect x="163" y="100" width="26" height="100"/>
+    <!-- Window lights scattered -->
+  </g>
+  <!-- Building window lights -->
+  <g fill="#FFE090" opacity=".7">
+    <rect x="13" y="135" width="3" height="3"/><rect x="19" y="135" width="3" height="3"/>
+    <rect x="13" y="142" width="3" height="3"/><rect x="19" y="148" width="3" height="3"/>
+    <rect x="38" y="120" width="3" height="3"/><rect x="44" y="128" width="3" height="3"/>
+    <rect x="90" y="110" width="3" height="3"/><rect x="96" y="118" width="3" height="3"/>
+    <rect x="112" y="100" width="3" height="3"/><rect x="120" y="110" width="3" height="3"/>
+    <rect x="167" y="108" width="3" height="3"/><rect x="174" y="115" width="3" height="3"/>
+  </g>
+  <!-- Han River reflection -->
+  <rect x="0" y="185" width="375" height="25" fill="#0A1828"/>
+  <rect x="0" y="185" width="375" height="8" fill="#1A3A6A" opacity=".5"/>
+</svg>`,
+
+  paris:`<svg style="position:absolute;inset:0;width:100%;height:100%" viewBox="0 0 375 210" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="psky" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#F5D0A0"/><stop offset="45%" stop-color="#E8A060"/><stop offset="100%" stop-color="#7A3A60"/></linearGradient>
+  </defs>
+  <rect width="375" height="210" fill="url(#psky)"/>
+  <!-- Sunset glow -->
+  <ellipse cx="188" cy="210" rx="220" ry="80" fill="#FF8020" opacity=".25"/>
+  <!-- Eiffel Tower — centered and prominent -->
+  <g fill="#2A1830">
+    <!-- Base legs -->
+    <polygon points="148,210 162,130 175,130 168,210"/>
+    <polygon points="200,210 213,130 226,130 220,210"/>
+    <!-- First platform -->
+    <rect x="155" y="128" width="72" height="8" rx="1"/>
+    <!-- Second level tapered -->
+    <polygon points="158,128 170,90 202,90 214,128"/>
+    <!-- Second platform -->
+    <rect x="167" y="88" width="38" height="6" rx="1"/>
+    <!-- Third level -->
+    <polygon points="170,88 178,60 194,60 202,88"/>
+    <!-- Top platform -->
+    <rect x="176" y="58" width="20" height="5" rx="1"/>
+    <!-- Antenna -->
+    <rect x="184" y="30" width="4" height="30" rx="1"/>
+    <!-- Beacon -->
+    <circle cx="186" cy="28" r="4" fill="#FFE040" opacity=".9"/>
+    <circle cx="186" cy="28" r="8" fill="#FFD020" opacity=".3"/>
+    <!-- Lattice details first section -->
+    <line x1="162" y1="210" x2="175" y2="130" stroke="#4A2840" stroke-width="1" opacity=".4"/>
+    <line x1="200" y1="210" x2="213" y2="130" stroke="#4A2840" stroke-width="1" opacity=".4"/>
+  </g>
+  <!-- Haussmann buildings flanking -->
+  <g fill="#4A2840" opacity=".8">
+    <rect x="0" y="145" width="30" height="65"/><polygon points="0,145 15,125 30,145"/>
+    <rect x="32" y="150" width="28" height="60"/><polygon points="32,150 46,133 60,150"/>
+    <rect x="62" y="148" width="25" height="62"/>
+    <rect x="265" y="148" width="28" height="62"/>
+    <rect x="295" y="145" width="30" height="65"/><polygon points="295,145 310,128 325,145"/>
+    <rect x="327" y="150" width="48" height="60"/>
+  </g>
+  <!-- Building windows lit warm -->
+  <g fill="#FFD080" opacity=".7">
+    <rect x="4" y="152" width="4" height="5"/><rect x="12" y="152" width="4" height="5"/>
+    <rect x="4" y="162" width="4" height="5"/><rect x="12" y="162" width="4" height="5"/>
+    <rect x="35" y="155" width="4" height="5"/><rect x="43" y="155" width="4" height="5"/>
+    <rect x="267" y="153" width="4" height="5"/><rect x="275" y="153" width="4" height="5"/>
+    <rect x="299" y="150" width="4" height="5"/><rect x="307" y="150" width="4" height="5"/>
+  </g>
+  <!-- Seine river -->
+  <rect x="0" y="192" width="375" height="18" fill="#6A3050" opacity=".7"/>
+  <rect x="0" y="192" width="375" height="5" fill="#C06080" opacity=".3"/>
+</svg>`,
+
+  barcelona:`<svg style="position:absolute;inset:0;width:100%;height:100%" viewBox="0 0 375 210" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bsky" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#0A3060"/><stop offset="50%" stop-color="#1A5090"/><stop offset="100%" stop-color="#3A80C0"/></linearGradient>
+  </defs>
+  <rect width="375" height="210" fill="url(#bsky)"/>
+  <!-- Bright Mediterranean sun -->
+  <circle cx="300" cy="50" r="30" fill="#FFE040" opacity=".85"/>
+  <circle cx="300" cy="50" r="50" fill="#FFB020" opacity=".2"/>
+  <!-- Sagrada Familia — the iconic spires -->
+  <g fill="#1A2840">
+    <!-- Main body -->
+    <rect x="140" y="120" width="95" height="90"/>
+    <!-- Rose window area -->
+    <circle cx="187" cy="148" r="18" fill="#1A2840" stroke="#2A3850" stroke-width="2"/>
+    <circle cx="187" cy="148" r="10" fill="#3A5880" opacity=".6"/>
+    <!-- Nativity facade spires (4 tall) -->
+    <rect x="143" y="60" width="14" height="65"/><polygon points="143,60 150,30 157,60"/>
+    <rect x="160" y="70" width="14" height="55"/><polygon points="160,70 167,42 174,70"/>
+    <!-- Glory facade spires (4 tall) -->
+    <rect x="198" y="65" width="14" height="58"/><polygon points="198,65 205,35 212,65"/>
+    <rect x="215" y="55" width="14" height="68"/><polygon points="215,55 222,22 229,55"/>
+    <!-- Central tower (taller) -->
+    <rect x="178" y="45" width="18" height="78"/><polygon points="178,45 187,8 196,45"/>
+    <!-- Cross atop central -->
+    <line x1="187" y1="8" x2="187" y2="0" stroke="#1A2840" stroke-width="3"/>
+    <line x1="183" y1="4" x2="191" y2="4" stroke="#1A2840" stroke-width="2"/>
+    <!-- Spire texture dots -->
+    <circle cx="150" cy="38" r="2.5" fill="#2A3A50"/>
+    <circle cx="167" cy="48" r="2" fill="#2A3A50"/>
+    <circle cx="222" cy="30" r="2.5" fill="#2A3A50"/>
+    <circle cx="205" cy="42" r="2" fill="#2A3A50"/>
+    <circle cx="187" cy="14" r="3" fill="#4A6888"/>
+  </g>
+  <!-- Mediterranean buildings flanking -->
+  <g fill="#0D2038" opacity=".9">
+    <rect x="0" y="155" width="30" height="55"/>
+    <rect x="32" y="160" width="25" height="50"/>
+    <rect x="59" y="155" width="35" height="55"/>
+    <rect x="265" y="158" width="30" height="52"/>
+    <rect x="297" y="150" width="40" height="60"/>
+    <rect x="339" y="155" width="36" height="55"/>
+  </g>
+  <!-- Sea horizon -->
+  <rect x="0" y="192" width="375" height="18" fill="#1A4A80" opacity=".8"/>
+  <rect x="0" y="192" width="375" height="4" fill="#5090C0" opacity=".5"/>
+  <!-- Seagulls -->
+  <path d="M60 90 Q65 85 70 90" stroke="#fff" stroke-width="1.5" fill="none" opacity=".6"/>
+  <path d="M80 80 Q85 75 90 80" stroke="#fff" stroke-width="1.5" fill="none" opacity=".5"/>
+  <path d="M45 100 Q49 96 53 100" stroke="#fff" stroke-width="1" fill="none" opacity=".4"/>
+</svg>`,
+};
+
+const CITIES={
+  rome:{name:'Rome',emoji:'🏛️',grad:'linear-gradient(150deg,#3A1A08,#6A3818,#3A2010)',experiences:[
+    {time:'09:00',em:'🏟️',name:'Colosseum Skip-the-Line',sub:'Beat morning crowds · 90 min · Arena floor',price:1939,rating:4.4,rev:'137k',walk:'🚶 8 min · 650m',free:false,bookings:'2,100 this month',badge:'Skip queue'},
+    {time:'10:45',em:'🏛️',name:'Roman Forum & Palatine',sub:'Walk where Caesar walked · 75 min · Included',price:0,rating:4.5,rev:'95k',walk:'🚕 10 min taxi',free:true,bookings:'Included with Colosseum'},
+    {time:'13:00',em:'🍴',name:'Lunch · Testaccio Market',sub:'Local food hall · budget ₹600–900 · just show up',price:null,rating:null,rev:null,walk:'🚕 15 min taxi',free:'freeTime'},
+    {time:'15:00',em:'🏛️',name:'Vatican Museums & Sistine Chapel',sub:'Skip 3hr queue · Michelangelo ceiling',price:3403,rating:4.3,rev:'133k',walk:'🚶 12 min · 950m',free:false,bookings:'8,400 this month',badge:'8K+/mo'},
+    {time:'19:00',em:'🌆',name:'Rooftop Dinner · Prati',sub:'Sunset · panoramic dome view · set menu',price:2499,rating:4.6,rev:'2.8k',walk:null,free:false,bookings:'Only 6 left tonight',badge:'🔥 6 left'},
+  ]},
+  seoul:{name:'Seoul',emoji:'🏯',grad:'linear-gradient(150deg,#0A1A2A,#1A3A5A,#0A2030)',experiences:[
+    {time:'09:00',em:'🏯',name:'Gyeongbokgung Palace + Hanbok Rental',sub:'Wear traditional dress · guided history tour · 2 hrs',price:1200,rating:4.7,rev:'44k',walk:'🚇 10 min metro',free:false,bookings:'1,800 adventure groups this month',badge:'Top pick'},
+    {time:'11:30',em:'🥋',name:'Korean Martial Arts Experience',sub:'Taekwondo · hapkido demo · hands-on session · 90 min',price:2100,rating:4.5,rev:'8k',walk:'🚶 6 min · 480m',free:false,bookings:'340 groups of 4 this month'},
+    {time:'13:30',em:'🍜',name:'Lunch · Gwangjang Market',sub:'Korea\'s oldest market · bindaetteok · tteokbokki · just show up',price:null,rating:null,rev:null,walk:'🚕 12 min taxi',free:'freeTime'},
+    {time:'15:00',em:'🎮',name:'Seoul VR Adventure Park',sub:'Cutting-edge VR experiences · extreme simulator · 2 hrs',price:1800,rating:4.4,rev:'12k',walk:'🚕 20 min taxi',free:false,bookings:'720 groups this week',badge:'Adventure'},
+    {time:'18:00',em:'🌃',name:'Namsan Tower Night View + Cable Car',sub:'Panoramic Seoul skyline · cable car ride · sunset',price:900,rating:4.6,rev:'88k',walk:'🚶 5 min',free:false,bookings:'3,200 this month',badge:'Iconic'},
+    {time:'20:00',em:'🍻',name:'Hongdae Street Food & Nightlife Tour',sub:'K-pop bars · street performers · local guide · 3 hrs',price:1500,rating:4.5,rev:'6k',walk:null,free:false,bookings:'Only 8 spots left tonight',badge:'🔥 8 left'},
+  ]},
+  paris:{name:'Paris',emoji:'🗼',grad:'linear-gradient(150deg,#1A1828,#3A3858,#201E38)',experiences:[
+    {time:'09:00',em:'🗼',name:'Eiffel Tower Summit Access',sub:'Skip the line · lift to top floor · 90 min',price:2800,rating:4.5,rev:'280k',walk:'🚶 10 min',free:false,bookings:'5,200 this month',badge:'Summit'},
+    {time:'11:00',em:'🎨',name:'Louvre Museum Guided Tour',sub:'Mona Lisa · Venus de Milo · expert guide · 2 hrs',price:3200,rating:4.4,rev:'190k',walk:'🚕 15 min taxi',free:false,bookings:'4,100 this month'},
+    {time:'13:30',em:'🥖',name:'Lunch · Marché des Enfants Rouges',sub:'Paris\'s oldest covered market · crêpes · wine · just explore',price:null,rating:null,rev:null,walk:'🚇 8 min metro',free:'freeTime'},
+    {time:'15:30',em:'⛵',name:'Seine River Cruise',sub:'Hop-on hop-off · 1 hr · all major monuments',price:1100,rating:4.6,rev:'52k',walk:'🚶 8 min',free:false,bookings:'2,800 this month'},
+    {time:'19:30',em:'🍷',name:'Montmartre Food & Wine Tour',sub:'Local bistros · Sacré-Cœur views · sommelier guide',price:2400,rating:4.7,rev:'3.2k',walk:null,free:false,bookings:'12 spots left tonight',badge:'🔥 12 left'},
+  ]},
+  barcelona:{name:'Barcelona',emoji:'🏖️',grad:'linear-gradient(150deg,#1A100A,#3A2010,#1A1408)',experiences:[
+    {time:'09:30',em:'⛪',name:'Sagrada Família Priority Access',sub:'Tower access · Gaudí museum · 2 hrs',price:2600,rating:4.8,rev:'230k',walk:'🚇 12 min metro',free:false,bookings:'6,100 this month',badge:'Must-do'},
+    {time:'12:00',em:'🌀',name:'Park Güell Timed Entry',sub:'Monumental zone · mosaic terrace · panoramic views',price:1400,rating:4.5,rev:'110k',walk:'🚕 18 min taxi',free:false,bookings:'3,400 this month'},
+    {time:'14:00',em:'🥘',name:'Lunch · La Boqueria Market',sub:'World-famous market · tapas · sangria · just show up',price:null,rating:null,rev:null,walk:'🚶 5 min',free:'freeTime'},
+    {time:'16:00',em:'🏖️',name:'Barceloneta Beach Sunset Cruise',sub:'Catamaran · open bar · swimming stop · 2.5 hrs',price:2200,rating:4.6,rev:'18k',walk:'🚕 15 min taxi',free:false,bookings:'Only 4 spots left today',badge:'🔥 4 left'},
+    {time:'20:00',em:'💃',name:'Flamenco Show + Tapas Dinner',sub:'Authentic tablao · 3-course dinner · 2 hrs',price:3100,rating:4.7,rev:'8.4k',walk:null,free:false,bookings:'22 groups this week'},
+  ]},
+};
+
+/* Alternatives pool per city */
+const ALTS={
+  rome:[
+    {em:'🎨',name:'Borghese Gallery',sub:'Book Bernini sculptures · timed entry · 2 hrs',price:1800,rating:4.7,rev:'28k'},
+    {em:'⛲',name:'Trevi Fountain Night Tour',sub:'After dark · fewer crowds · local storyteller',price:800,rating:4.5,rev:'12k'},
+    {em:'🍕',name:'Roman Cooking Class',sub:'Make pasta, tiramisu · eat what you cook · 3 hrs',price:2200,rating:4.8,rev:'6k'},
+    {em:'🛵',name:'Vespa Tour of Rome',sub:'Guided scooter ride · hidden spots · 3 hrs',price:2800,rating:4.6,rev:'4k'},
+    {em:'⛪',name:'St Peter\'s Basilica Dome Climb',sub:'Panoramic views · skip line · 90 min',price:700,rating:4.4,rev:'41k'},
+  ],
+  seoul:[
+    {em:'🎪',name:'Lotte World Adventure Pass',sub:'Theme park · indoor + outdoor rides · full day',price:2800,rating:4.5,rev:'32k'},
+    {em:'🏊',name:'Dragon Hill Spa Experience',sub:'Traditional jjimjilbang · 4 hrs · authentic',price:900,rating:4.6,rev:'18k'},
+    {em:'🎵',name:'K-pop Dance Class',sub:'Learn choreography · photo session · 2 hrs',price:1400,rating:4.7,rev:'9k'},
+    {em:'🚡',name:'Bukhansan Hiking Tour',sub:'National park · guided trail · city views · 4 hrs',price:1800,rating:4.8,rev:'5k'},
+    {em:'🎭',name:'Nanta Kitchen Show',sub:'Iconic performance · comedy + drumming · 1.5 hrs',price:1200,rating:4.5,rev:'44k'},
+  ],
+  paris:[{em:'🏰',name:'Versailles Palace Day Trip',sub:'Palace + gardens + fountains · full day',price:3800,rating:4.6,rev:'58k'},{em:'🎭',name:'Moulin Rouge Show',sub:'Iconic cabaret · champagne · 2 hrs',price:7200,rating:4.7,rev:'22k'},{em:'🚲',name:'Paris by Bike Tour',sub:'Hidden streets · local guide · 3 hrs',price:1400,rating:4.8,rev:'12k'}],
+  barcelona:[{em:'🏟️',name:'FC Barcelona Stadium Tour',sub:'Camp Nou · trophy room · pitch access · 2 hrs',price:1900,rating:4.5,rev:'66k'},{em:'🍷',name:'Penedès Wine Tour',sub:'Day trip · vineyard · cava tasting · 6 hrs',price:4200,rating:4.7,rev:'8k'},{em:'🚁',name:'Barcelona Helicopter Tour',sub:'15 min · seafront · Gaudí landmarks · breathtaking',price:8500,rating:4.9,rev:'2k'}],
+};
+
+/* Extra experiences to ADD */
+const ADDABLE={
+  rome:[{em:'🌙',name:'Night Walk – Ancient Rome',sub:'After-hours · lantern tour · 2 hrs',price:1100,rating:4.6,rev:'8k'},{em:'🧀',name:'Cheese & Wine Tasting',sub:'Local cantina · 6 wines · 1.5 hrs',price:1400,rating:4.7,rev:'3k'},{em:'⛩️',name:'Pantheon Interior Access',sub:'Free entry · guided visit · 45 min',price:300,rating:4.5,rev:'22k'}],
+  seoul:[{em:'🌙',name:'Han River Night Cruise',sub:'City lights · outdoor deck · 1.5 hrs',price:800,rating:4.5,rev:'14k'},{em:'🎮',name:'PC Bang Experience',sub:'Korean gaming cafe · 2 hrs · local snacks',price:400,rating:4.4,rev:'6k'},{em:'👟',name:'Sneaker & Streetwear Market Tour',sub:'Dongdaemun · local guide · 2 hrs',price:900,rating:4.6,rev:'3k'}],
+  paris:[{em:'🎠',name:'Tuileries Garden Ferris Wheel',sub:'City views · 20 min · family-friendly',price:500,rating:4.3,rev:'18k'},{em:'🍰',name:'Pastry & Coffee Walking Tour',sub:'7 patisseries · croissants · macarons · 2 hrs',price:1600,rating:4.8,rev:'4k'}],
+  barcelona:[{em:'💻',name:'Barcelona Tech & Innovation Tour',sub:'Startups · labs · city of innovation · 3 hrs',price:1800,rating:4.5,rev:'2k'},{em:'🌅',name:'Bunkers del Carmel Sunset',sub:'Best panoramic view · free · bring wine',price:0,rating:4.9,rev:'28k'}],
+};
+
+/* Parse prompt to extract city */
+function parseCity(prompt){
+  const p=prompt.toLowerCase();
+  if(p.includes('seoul')) return 'seoul';
+  if(p.includes('paris')) return 'paris';
+  if(p.includes('barcelona')) return 'barcelona';
+  if(p.includes('rome')||p.includes('roma')) return 'rome';
+  return 'seoul'; // default to what user typed
+}
+
+/* Parse prompt to extract travellers */
+function parseTravellers(prompt){
+  const m=prompt.match(/(\d+)\s*(friend|people|person|traveller|traveler|of us|pax)/i);
+  if(m) return parseInt(m[1]);
+  const g=prompt.match(/(group of|party of)\s*(\d+)/i);
+  if(g) return parseInt(g[2]);
+  return travellers;
+}
+
+/* Parse prompt to extract days */
+function parseDays(prompt){
+  const m=prompt.match(/(\d+)\s*day/i);
+  if(m) return parseInt(m[1]);
+  return days;
+}
+
+/* Parse prompt to extract budget */
+function parseBudget(prompt){
+  const m=prompt.match(/(\d[\d,]*)\s*(rupee|rs|inr|₹)/i)||prompt.match(/(?:₹|rs\.?\s*)(\d[\d,]*)/i);
+  if(m){const n=parseInt(m[1]||m[2].replace(/,/g,''));return n;}
+  return null;
+}
+
+let cityKey='rome';
+let parsedBudget=null;
+let cityExperiences=[];
+
+function initFromPrompt(){
+  const prompt=userPrompt||'';
+  cityKey=parseCity(prompt);
+  if(prompt) travellers=parseTravellers(prompt)||travellers;
+  if(prompt) days=parseDays(prompt)||days;
+  parsedBudget=parseBudget(prompt);
+  // deep copy experiences
+  cityExperiences=JSON.parse(JSON.stringify(CITIES[cityKey].experiences));
+}
+
+function fmt(n){return '₹'+Math.round(n).toLocaleString('en-IN');}
+function fmtCity(){return CITIES[cityKey]||CITIES.rome;}
+
+function calcTotal(){
+  return cityExperiences.reduce((s,e)=>s+(e.price&&e.price>0?e.price*travellers:0),0);
+}
+
+/* ═══════════════════════════════════════════
+   SCREEN 0 — PLAN
+═══════════════════════════════════════════ */
+function s0(){
+  const city=fmtCity();
+  const examples=[
+    '3 days in Seoul for a group of 4 friends. 20th–22nd March, overall budget is ₹75,000. Adventure and exciting.',
+    'Solo trip to Paris, 2 days. Into art and cafés. Budget ₹15,000. Feel like a local.',
+    '4 of us in Barcelona for a weekend. Couples trip. Beaches + architecture + nightlife. ₹60,000 total. Relaxed mornings, active evenings.',
+  ];
+  const exLabels=['🏯 Adventure Seoul','🎨 Solo Paris','💑 Couples Barcelona'];
+  const ints=['Adventure','Cultural','Food & Drink','Art','Nightlife','Family','Romantic','Nature'];
+  return `
+  <div class="hero" id="city-hero" style="position:relative;overflow:hidden;">
+    <div style="position:absolute;inset:0;background:${CITY_BG[cityKey]};"></div>
+    ${CITY_SVG[cityKey]}
+    <div class="hero-overlay"></div>
+    <div class="hero-bar">
+      <div class="hero-city" onclick="showCityPicker()">📍 ${city.name} ▾</div>
+      <div class="hero-help">?</div>
+    </div>
+  </div>
+  <div class="float-search">🔍 <span style="color:#C8C8C8;">Search experiences and cities</span></div>
+  <div class="sec-label">Plan my trip with AI</div>
+  <div class="dm-card">
+    <div class="dm-hd">
+      <div class="dm-ey">✦ DayMind · AI Trip Planner</div>
+      <div class="dm-t">Describe your trip in your own words</div>
+      <div class="dm-s">Budget · group size · interests · pace — say it naturally</div>
+    </div>
+    <div class="dm-bd">
+      <textarea class="pbox" id="ptxt" rows="3"
+        placeholder="e.g. 3 days in Seoul with 4 friends, overall budget ₹75,000, adventure and exciting…"
+        oninput="userPrompt=this.value">${userPrompt}</textarea>
+      <div class="ex-lbl">Try an example</div>
+      <div class="ex-chips">${examples.map((e,i)=>`<div class="ex-chip" onclick="useEx(${i})"><strong>${exLabels[i]}</strong> — ${e.slice(0,52)}…</div>`).join('')}</div>
+      <div class="ftog" onclick="toggleFilter()"><span id="ftxt">⚙ Prefer to set filters yourself?</span></div>
+      <div class="fmode ${filterMode?'show':''}" id="fmode">
+        <div class="fl">City</div><input class="fi" id="fcity" value="${city.name}" onchange="updateCityFromFilter(this.value)"/>
+        <div class="fg">
+          <div><div class="fl">Travellers</div>
+          <div class="cw"><div class="cwl">People</div><div class="cwb"><button class="cb" onclick="chT(-1)">−</button><div class="cv" id="tv">${travellers}</div><button class="cb" onclick="chT(1)">+</button></div></div></div>
+          <div><div class="fl">Days</div>
+          <div class="cw"><div class="cwl">Nights</div><div class="cwb"><button class="cb" onclick="chD(-1)">−</button><div class="cv" id="dv">${days}</div><button class="cb" onclick="chD(1)">+</button></div></div></div>
+        </div>
+        <div class="fl" style="margin-top:2px;">Total budget (group)</div>
+        <input class="fi" placeholder="e.g. ₹75,000" value="${parsedBudget?fmt(parsedBudget):''}"/>
+        <div class="fl">Interests</div>
+        <div class="ichips">${ints.map(i=>`<div class="ich ${interests.includes(i)?'on':''}" onclick="togInt('${i}',this)">${i}</div>`).join('')}</div>
+        <div style="height:8px;"></div>
+      </div>
+      <button class="plan-btn" onclick="startBuild()">✦ Build my ${days}-day plan →</button>
+      <div class="plan-note">Instant itinerary · Book all in one tap · No account needed</div>
+    </div>
+  </div>
+  <div class="sec-label" style="padding-top:4px;">Most-loved itineraries</div>
+  <div class="irow">
+    <div class="icard ic1" onclick="goS(0)"><div class="icnum">01</div><div class="iclbl">DAY PLAN</div></div>
+    <div class="icard ic3" onclick="goS(0)"><div class="icnum">03</div><div class="iclbl">DAY PLAN</div></div>
+    <div class="icard ic5" onclick="goS(0)"><div class="icnum">05</div><div class="iclbl">DAY PLAN</div></div>
+  </div>
+  <div class="sec-label">Top experiences in ${city.name}</div>
+  <div class="hrow">${cityExperiences.filter(e=>e.price>0).slice(0,4).map(e=>`
+    <div class="hcard">
+      <div class="hcard-img" style="background:${expGrad(e.em)};">${e.em}</div>
+      <div class="hcard-bd">
+        ${e.rating?`<div class="hrat"><span class="hs">★</span><span class="hsc">${e.rating}</span><span class="hcc">(${e.rev})</span></div>`:''}
+        <div class="hname">${e.name}</div>
+        <div class="hprice">${e.price?fmt(e.price):'Free'}</div>
+      </div>
+    </div>`).join('')}</div>
+  <div style="height:12px;"></div>`;
+}
+
+function expGrad(em){
+  const map={'🏟️':'linear-gradient(135deg,#EDE0C8,#C8A870)','🏛️':'linear-gradient(135deg,#DDD5F0,#B8A8D8)','🌆':'linear-gradient(135deg,#F5C880,#D09040)','🏯':'linear-gradient(135deg,#C8D8E8,#8AA8C8)','🥋':'linear-gradient(135deg,#F5E0C8,#D8B890)','🎮':'linear-gradient(135deg,#C8F0E8,#80D0C0)','🌃':'linear-gradient(135deg,#181838,#383878)','🍻':'linear-gradient(135deg,#F8E8A8,#D8C060)','🗼':'linear-gradient(135deg,#E8E0F0,#C0A8D8)','🎨':'linear-gradient(135deg,#F8D8C8,#D89878)','⛵':'linear-gradient(135deg,#C8E0F8,#88B8E8)','🍷':'linear-gradient(135deg,#F0C8D0,#C88898)','⛪':'linear-gradient(135deg,#F0E8D0,#D0C0A0)','🏖️':'linear-gradient(135deg,#F8E8C8,#D8C080)','💃':'linear-gradient(135deg,#F8C8D0,#D08090)'};
+  return map[em]||'linear-gradient(135deg,#EFEFEF,#DDD)';
+}
+
+/* ═══════════════════════════════════════════
+   SCREEN 1 — BUILDING (dynamic)
+═══════════════════════════════════════════ */
+function s1(){
+  const city=fmtCity();
+  const prompt=userPrompt||`${days} days in ${city.name} for ${travellers} people`;
+  const short=prompt.length>55?prompt.slice(0,55)+'…':prompt;
+  const exps=cityExperiences;
+  return `
+  <div class="bwrap">
+    <div class="bt">Building your ${city.name} plan…</div>
+    <div class="bs">Checking real-time availability across 140+ ${city.name} experiences</div>
+    <div class="tpill-row">
+      <div class="tpill">📍 ${city.name}</div>
+      <div class="tpill">👥 ${travellers} people</div>
+      <div class="tpill">📅 ${days} days</div>
+      ${parsedBudget?`<div class="tpill">💰 ${fmt(parsedBudget)} total</div>`:''}
+      <div class="tpill">💬 "${short}"</div>
+    </div>
+    <div class="slist">
+      <div class="srow"><div class="sic done">✓</div><div><div class="st">Understood your trip</div><div class="ss">${travellers} people · ${days} days · ${interests.slice(0,2).join(' & ')} · ${parsedBudget?fmt(parsedBudget)+' total':'open budget'}</div></div></div>
+      <div class="srow"><div class="sic done">✓</div><div><div class="st">Matched your interests</div><div class="ss">Found ${exps.length+17} ${city.name} experiences fitting ${interests[0]||'your vibe'}</div></div></div>
+      <div class="srow"><div class="sic done">✓</div><div><div class="st">Checked logistics</div><div class="ss">Walking distances · slot times · crowd levels today</div></div></div>
+      <div class="srow"><div class="sic done">✓</div><div><div class="st">Sequenced your days</div><div class="ss">Start ${exps[0]?.name?.split(' ')[0]} 9am · beat crowds · free time at lunch</div></div></div>
+      <div class="srow"><div class="sic doing">→</div><div><div class="st">Confirming tonight's slots</div><div class="ss">${exps[exps.length-1]?.name} — limited spots remaining…</div></div></div>
+    </div>
+    <div class="prev-card">
+      <div class="plbl">Day 1 preview — ${city.name}</div>
+      ${exps.map((e,i)=>`
+        ${i>0&&exps[i-1]?`<div class="pline"></div>`:''}
+        <div class="prow"><div class="ptm">${e.time}</div><div class="pdot ${e.free==='freeTime'?'r':''}"></div><div><div class="pn">${e.name}</div><div class="pm">${e.sub.split('·')[0].trim()}</div></div></div>
+      `).join('')}
+    </div>
+    <button class="see-btn" onclick="goS(2)">Verify my plan →</button>
+  </div>`;
+}
+
+/* ═══════════════════════════════════════════
+   SCREEN 2 — VERIFY ITINERARY (fully interactive)
+═══════════════════════════════════════════ */
+function s2(){
+  const city=fmtCity();
+  const total=calcTotal();
+  const exps=cityExperiences;
+  const bookable=exps.filter(e=>e.price>0);
+  const totalKm=(exps.filter(e=>e.walk&&e.walk.includes('km')).length*0.7+0.5).toFixed(1);
+  // Day tabs
+  const dayTabs=Array.from({length:days},(_,i)=>`<div class="dtab ${activeDay===i?'on':''}" onclick="switchDay(${i})">${['Day 1','Day 2','Day 3','Day 4','Day 5'][i]} · ${['Sun','Mon','Tue','Wed','Thu'][i]}</div>`).join('');
+
+  return `
+  <div class="itwrap">
+    <div class="ithead">
+      <div class="itback" onclick="goS(0)">← Edit trip</div>
+      <div class="ittitle">Your ${city.name} Plan</div>
+      <div class="ittags">
+        <div class="ittag">👥 ${travellers} people</div>
+        <div class="ittag">📅 ${days} days</div>
+        <div class="ittag">💰 ${fmt(total)}</div>
+        ${parsedBudget&&total>parsedBudget?`<div class="ittag" style="background:rgba(232,25,90,.2);color:#FF8090;">⚠ Over budget</div>`:parsedBudget?`<div class="ittag" style="background:rgba(0,163,98,.15);color:#80FFB8;">✓ Within budget</div>`:''}
+        <div class="ittag">✦ AI curated</div>
+      </div>
+    </div>
+    <div class="statbar">
+      <div class="stit"><div class="stv">${bookable.length}</div><div class="stl">Bookable</div></div>
+      <div class="stit"><div class="stv">${exps.length*1.5+4}h</div><div class="stl">Total time</div></div>
+      <div class="stit"><div class="stv">${totalKm}km</div><div class="stl">Walking</div></div>
+      <div class="stit"><div class="stv">${(exps.filter(e=>e.rating).reduce((s,e)=>s+e.rating,0)/exps.filter(e=>e.rating).length).toFixed(1)}★</div><div class="stl">Avg rating</div></div>
+    </div>
+    <div class="dtabs">${dayTabs}<button class="add-exp-btn" onclick="openAddModal()">+ Add</button></div>
+    <div class="tl">
+      ${renderTimeline(exps)}
+      <div style="height:175px;"></div>
+    </div>
+    <div class="bookbar">
+      <div class="bookinner">
+        <div class="bil"><div class="bit">${bookable.length} experiences · Day ${activeDay+1}</div><div class="bis">${travellers} people · all logistics sorted</div></div>
+        <div class="bir"><div class="bilbl">Total</div><div class="bival">${fmt(total)}</div></div>
+      </div>
+      <button class="bookbtn" onclick="goS(3)">Book all ${travellers} tickets →</button>
+      <div class="booknote">✓ Free cancellation &nbsp;·&nbsp; ✓ Instant confirm &nbsp;·&nbsp; ✓ No hidden fees</div>
+    </div>
+    ${activeModal?renderModal():''}
+  </div>`;
+}
+
+function renderTimeline(exps){
+  return exps.map((e,i)=>{
+    const isFree=e.free==='freeTime';
+    const isIncl=e.free===true;
+    // cohort proof — mirrors what user said
+    let proof='';
+    if(e.bookings&&!isFree&&!isIncl){
+      proof=`<div class="cohort"><span class="cn">${e.bookings}</span> booked by groups of ${travellers} with ${interests[0]||'similar'} interests</div>`;
+    }
+    const walk=e.walk?`<div class="walkrow"><div class="walkdash"></div><div class="walktxt">${e.walk}</div></div>`:'';
+    const card=isFree?`
+      <div class="tlcard free">
+        <div class="tlbody" style="padding:9px 10px;">
+          <div class="tlname">${e.em} ${e.name}</div>
+          <div class="tlsub">${e.sub}</div>
+        </div>
+      </div>`:`
+      <div class="tlcard">
+        <div class="tlcard-img" style="background:${expGrad(e.em)};">${e.em}
+          <div class="tlbadges">
+            ${e.badge?`<div class="tlb ${e.badge.includes('🔥')||e.badge.includes('left')?'rd':e.badge==='Must-do'||e.badge==='Top pick'?'gr':''}">${e.badge}</div>`:''}
+            ${e.rating?`<div class="tlb gr">${e.rating} ★</div>`:''}
+          </div>
+        </div>
+        <div class="tlbody">
+          <div class="tlname">${e.name}</div>
+          <div class="tlsub">${e.sub}</div>
+          ${proof}
+          <div class="tlfoot">
+            <div>${e.rating?`<div class="tlrat"><span class="tlstar">★</span><span class="tlsc">${e.rating} (${e.rev})</span></div>`:''}</div>
+            <div style="display:flex;align-items:center;gap:4px;">
+              <div class="tlprice">${isIncl?'<span style="color:#00A362;font-size:10px;">Free ✓</span>':fmt(e.price)}</div>
+              <div class="act-btns">
+                <div class="swap-btn" onclick="openSwap(${i})">⇄ Swap</div>
+                <div class="edit-btn" onclick="openEdit(${i})">✎ Edit</div>
+                <div class="rem-btn" onclick="removeExp(${i})">✕</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    return `
+      <div class="tlrow">
+        <div class="tll"><div class="tlt">${e.time}</div><div class="tld ${isFree?'r':''}"></div>${i<exps.length-1?'<div class="tlvl"></div>':''}</div>
+        ${card}
+      </div>
+      ${e.walk&&i<exps.length-1?`<div class="walkrow"><div class="walkdash"></div><div class="walktxt">${e.walk}</div></div>`:''}`;
+  }).join('');
+}
+
+function renderModal(){
+  if(activeModal==='swap'){
+    const alts=(ALTS[cityKey]||ALTS.rome);
+    return `<div class="modal-bg" onclick="closeModal()">
+      <div class="modal-sheet" onclick="event.stopPropagation()" style="position:relative;">
+        <div class="modal-handle"></div>
+        <div class="modal-title">Swap experience</div>
+        <div class="modal-close" onclick="closeModal()">✕</div>
+        <div style="padding:0 0 6px;">
+          ${alts.map((a,i)=>`<div class="alt-card" onclick="doSwap(${i})">
+            <div class="alt-em">${a.em}</div>
+            <div class="alt-info">
+              <div class="alt-name">${a.name}</div>
+              <div class="alt-sub">${a.sub}</div>
+              <div class="alt-foot"><div class="alt-rat">★ ${a.rating} (${a.rev})</div><div class="alt-price">${fmt(a.price)}</div></div>
+            </div>
+          </div>`).join('')}
+        </div>
+      </div>
+    </div>`;
+  }
+  if(activeModal==='add'){
+    const adds=(ADDABLE[cityKey]||ADDABLE.rome);
+    const city=fmtCity();
+    return `<div class="modal-bg" onclick="closeModal()">
+      <div class="modal-sheet" onclick="event.stopPropagation()" style="position:relative;">
+        <div class="modal-handle"></div>
+        <div class="modal-title">Add to your ${city.name} day</div>
+        <div class="modal-close" onclick="closeModal()">✕</div>
+        <div style="padding:0 0 6px;">
+          ${adds.map((a,i)=>`<div class="add-card">
+            <div class="add-em">${a.em}</div>
+            <div class="add-info">
+              <div class="add-name">${a.name}</div>
+              <div class="add-sub">${a.sub}</div>
+              <div class="add-price">${a.price?fmt(a.price):'Free'} &nbsp;·&nbsp; ★ ${a.rating} (${a.rev})</div>
+            </div>
+            <button class="add-selb" onclick="doAdd(${i})">+ Add</button>
+          </div>`).join('')}
+        </div>
+      </div>
+    </div>`;
+  }
+  if(activeModal==='edit'){
+    const e=cityExperiences[editTarget];
+    if(!e) return '';
+    return `<div class="modal-bg" onclick="closeModal()">
+      <div class="modal-sheet" onclick="event.stopPropagation()" style="position:relative;padding-bottom:24px;">
+        <div class="modal-handle"></div>
+        <div class="modal-title">Edit experience</div>
+        <div class="modal-close" onclick="closeModal()">✕</div>
+        <div style="padding:0 15px;">
+          <div class="fl">Experience name</div>
+          <input class="edit-field" id="edit-name" value="${e.name}"/>
+          <div class="fl">Time slot</div>
+          <input class="edit-field" id="edit-time" value="${e.time}"/>
+          <div class="fl">Notes / description</div>
+          <input class="edit-field" id="edit-sub" value="${e.sub}"/>
+          <button class="edit-save" onclick="saveEdit()">Save changes</button>
+        </div>
+      </div>
+    </div>`;
+  }
+  return '';
+}
+
+/* ═══════════════════════════════════════════
+   SCREEN 3 — PAYMENT
+═══════════════════════════════════════════ */
+function s3(){
+  const city=fmtCity();
+  const total=calcTotal();
+  const bookable=cityExperiences.filter(e=>e.price>0);
+  return `
+  <div class="paywrap">
+    <div class="payhead">
+      <div class="payback" onclick="goS(2)">←</div>
+      <div><div class="payht">Checkout</div><div class="payhs">${travellers} people · ${bookable.length} experiences · ${city.name} Day ${activeDay+1}</div></div>
+    </div>
+    <div style="overflow-y:auto;max-height:calc(100% - 52px);">
+    <div class="paybody">
+      <div class="psec">Who's paying</div>
+      <div class="mrow">
+        <div class="mav">👩</div>
+        <div><div class="mname">You &nbsp;<span class="mbadge">Lead booker</span></div><div style="font-size:9px;color:#aaa;">Receives all tickets · others pay you back via UPI</div></div>
+        <div class="mamt">${fmt(total)}</div>
+      </div>
+      ${travellers>1?`<div class="splitnote">💡 After booking, ${travellers-1} UPI payment link${travellers>2?'s':''} sent automatically. No awkward splitting.</div>`:''}
+      <div class="psec mt">Your booking</div>
+      <div class="obox">
+        ${bookable.map(e=>`<div class="orow"><div class="oname">${e.em} ${e.name} × ${travellers}</div><div class="oval">${fmt(e.price*travellers)}</div></div>`).join('')}
+        <div class="ototal"><div class="otl">Total</div><div class="otv">${fmt(total)}</div></div>
+        <div class="inclnote">✅ All taxes & fees included · no surprise charges</div>
+      </div>
+      <div class="psec">Pay with</div>
+      <div class="pay-tabs" id="ptabs">
+        <div class="pay-tab on" onclick="switchPayTab('cc',this)">💳 Credit Card</div>
+        <div class="pay-tab" onclick="switchPayTab('dc',this)">🏦 Debit Card</div>
+        <div class="pay-tab" onclick="switchPayTab('upi',this)">🔵 UPI</div>
+      </div>
+      <div id="pay-cc" class="pay-panel">
+        <input class="pinp" placeholder="Card number" value="4242 4242 4242 4242"/>
+        <input class="pinp" placeholder="Cardholder name" value="Priya Sharma"/>
+        <div class="pr"><input class="pinp" placeholder="MM / YY" value="08 / 27"/><input class="pinp" placeholder="CVV" value="•••"/></div>
+        <div style="display:flex;gap:8px;margin-bottom:6px;flex-wrap:wrap;">
+          <div style="display:flex;align-items:center;gap:5px;padding:4px 10px;border:1px solid #E8E8E8;border-radius:7px;font-size:10px;color:#555;background:#fff;">
+            <span style="font-size:14px;">💳</span> Visa</div>
+          <div style="display:flex;align-items:center;gap:5px;padding:4px 10px;border:1px solid #E8E8E8;border-radius:7px;font-size:10px;color:#555;background:#fff;">
+            <span style="font-size:14px;">🔴</span> Mastercard</div>
+          <div style="display:flex;align-items:center;gap:5px;padding:4px 10px;border:1px solid #E8E8E8;border-radius:7px;font-size:10px;color:#555;background:#fff;">
+            <span style="font-size:14px;">🟦</span> RuPay</div>
+        </div>
+      </div>
+      <div id="pay-dc" class="pay-panel" style="display:none;">
+        <input class="pinp" placeholder="Debit card number"/>
+        <input class="pinp" placeholder="Cardholder name"/>
+        <div class="pr"><input class="pinp" placeholder="MM / YY"/><input class="pinp" placeholder="CVV"/></div>
+        <div style="font-size:10px;color:#aaa;margin-bottom:8px;">Supported: SBI · HDFC · ICICI · Axis · PNB · Kotak and all major banks</div>
+      </div>
+      <div id="pay-upi" class="pay-panel" style="display:none;">
+        <div style="background:#F8F8F8;border-radius:11px;padding:14px;margin-bottom:8px;text-align:center;">
+          <div style="font-size:28px;margin-bottom:6px;">📱</div>
+          <div style="font-size:12px;font-weight:700;color:#000;margin-bottom:4px;">Enter UPI ID</div>
+          <input class="pinp" placeholder="yourname@upi" style="text-align:center;"/>
+          <div style="font-size:10px;color:#aaa;">Or pay via GPay · PhonePe · Paytm · BHIM</div>
+        </div>
+      </div>
+      <div class="sslr">🔒 256-bit SSL · Free cancellation on all ${bookable.length} experiences</div>
+      <button class="paybtn" onclick="goS(4)">Confirm & Book All · ${fmt(total)}</button>
+      <div class="payg">No account needed · All tickets to your email instantly</div>
+    </div>
+    </div>
+  </div>`;
+}
+
+/* ═══════════════════════════════════════════
+   SCREEN 4 — CONFIRMED
+═══════════════════════════════════════════ */
+function s4(){
+  const city=fmtCity();
+  const total=calcTotal();
+  const ppTotal=Math.round(total/travellers);
+  const bookable=cityExperiences.filter(e=>e.price>0);
+  const ref='HO-'+city.name.slice(0,3).toUpperCase()+'-'+Math.floor(Math.random()*9000+1000);
+  // next city suggestion
+  const nextCities={rome:'Florence',seoul:'Busan',paris:'Lyon',barcelona:'Madrid'};
+  const nextCity=nextCities[cityKey]||'next city';
+  return `
+  <div class="conwrap">
+    <div class="conhero">
+      <div class="conem">🎉</div>
+      <div class="cont">${city.name} Day ${activeDay+1}, sorted.</div>
+      <div class="cons">All ${bookable.length*travellers} tickets in your inbox · no queues, no stress</div>
+      <div class="conref">#${ref}</div>
+    </div>
+    <div class="conbody">
+      <div class="recap">
+        <div class="reclbl">${city.name} — Day ${activeDay+1} plan</div>
+        ${bookable.map(e=>`<div class="recrow"><div class="rectm">${e.time}</div><div><div class="recname">${e.name}</div><div class="recprice">${fmt(e.price)} × ${travellers} = ${fmt(e.price*travellers)}</div></div></div>`).join('')}
+      </div>
+      ${travellers>1?`
+      <div class="splitrec">
+        <div class="reclbl">Group split · UPI links sent</div>
+        <div class="srrow"><div class="srnm">You paid</div><div class="srv p">${fmt(total)}</div></div>
+        <div class="srrow"><div class="srnm">Per person</div><div class="srv">${fmt(ppTotal)} <span style="font-size:8px;color:#bbb;">· link sent via SMS</span></div></div>
+      </div>`:''}
+      <div class="nextcard">
+        <div class="ncev">✦ Detected from your trip context</div>
+        <div class="nct">Plan your ${nextCity} days?</div>
+        <div class="ncs">We know your preferences · ${travellers} people · ${interests[0]} focus</div>
+        <button class="ncbtn" onclick="planNextCity('${nextCity}')">Plan ${nextCity} with AI →</button>
+      </div>
+      <div class="sharecard">
+        <div class="share-lbl">Share your itinerary</div>
+        <div class="share-sub">Let your group see the full plan</div>
+        <div class="share-btns">
+          <button class="share-btn wa" onclick="shareAction('whatsapp')">
+            <span>💬</span> WhatsApp
+          </button>
+          <button class="share-btn copy" onclick="shareAction('copy')">
+            <span>🔗</span> Copy link
+          </button>
+          <button class="share-btn dl" onclick="shareAction('download')">
+            <span>📄</span> Save PDF
+          </button>
+        </div>
+        <div id="share-toast" class="share-toast" style="display:none;"></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ═══════════════════════════════════════════
+   INTERACTION HANDLERS
+═══════════════════════════════════════════ */
+function goS(n){
+  if(n===1) initFromPrompt();
+  curS=n;
+  // sync sidebar
+  document.querySelectorAll('.snav-item[data-s]').forEach(el=>el.classList.toggle('on',+el.dataset.s===n));
+  activeModal=null;
+  document.getElementById('scr').innerHTML=[s0,s1,s2,s3,s4][n]();
+  document.getElementById('scr').scrollTop=0;
+}
+
+function navTo(n){
+  if(n===1) initFromPrompt();
+  goS(n);
+}
+
+function tryCity(key){
+  cityKey=key;
+  userPrompt=`${days} days in ${CITIES[key].name} for ${travellers} people. ${interests[0]||'Adventure'} focus.`;
+  cityExperiences=JSON.parse(JSON.stringify(CITIES[key].experiences));
+  goS(0);
+}
+
+function tryGroup(n,label){
+  travellers=n;
+  userPrompt=`${days} days in ${fmtCity().name} for ${n} people (${label}). ${interests[0]||'Adventure'} focus. Budget ₹${(n*8000).toLocaleString('en-IN')} total.`;
+  goS(0);
+}
+
+function switchPayTab(type,el){
+  document.querySelectorAll('.pay-tab').forEach(t=>t.classList.remove('on'));
+  el.classList.add('on');
+  document.querySelectorAll('.pay-panel').forEach(p=>p.style.display='none');
+  const panel=document.getElementById('pay-'+type);
+  if(panel) panel.style.display='block';
+}
+
+function shareAction(type){
+  const msgs={
+    whatsapp:'✅ Sent to your group via WhatsApp!',
+    copy:'🔗 Link copied to clipboard!',
+    download:'📄 PDF saved to your downloads!'
+  };
+  const toast=document.getElementById('share-toast');
+  if(toast){
+    toast.textContent=msgs[type]||'Done!';
+    toast.style.display='block';
+    setTimeout(()=>{toast.style.display='none';},2500);
+  }
+}
+
+function startBuild(){
+  initFromPrompt();
+  goS(1);
+}
+
+function switchDay(i){
+  activeDay=i;
+  document.getElementById('scr').innerHTML=s2();
+  document.getElementById('scr').scrollTop=0;
+}
+
+function openSwap(i){swapTarget=i;activeModal='swap';refreshS2();}
+function openEdit(i){editTarget=i;activeModal='edit';refreshS2();}
+function openAddModal(){activeModal='add';refreshS2();}
+function closeModal(){activeModal=null;swapTarget=null;editTarget=null;refreshS2();}
+
+function doSwap(altIdx){
+  const alts=ALTS[cityKey]||ALTS.rome;
+  const alt=alts[altIdx];
+  const old=cityExperiences[swapTarget];
+  cityExperiences[swapTarget]={
+    time:old.time,em:alt.em,name:alt.name,sub:alt.sub,
+    price:alt.price,rating:alt.rating,rev:alt.rev,
+    walk:old.walk,free:false,bookings:`${Math.floor(Math.random()*800+200)} groups this month`
+  };
+  activeModal=null;swapTarget=null;refreshS2();
+}
+
+function doAdd(idx){
+  const adds=ADDABLE[cityKey]||ADDABLE.rome;
+  const a=adds[idx];
+  // find a sensible time slot after last experience
+  const lastTime=cityExperiences[cityExperiences.length-1]?.time||'20:00';
+  const [h]=lastTime.split(':').map(Number);
+  const newTime=`${String(Math.min(h+2,22)).padStart(2,'0')}:00`;
+  cityExperiences.push({time:newTime,em:a.em,name:a.name,sub:a.sub,price:a.price||0,rating:a.rating,rev:a.rev,walk:null,free:a.price===0,bookings:`${Math.floor(Math.random()*400+100)} groups this month`});
+  activeModal=null;refreshS2();
+}
+
+function removeExp(i){
+  cityExperiences.splice(i,1);
+  activeModal=null;refreshS2();
+}
+
+function saveEdit(){
+  const n=document.getElementById('edit-name')?.value;
+  const t=document.getElementById('edit-time')?.value;
+  const s=document.getElementById('edit-sub')?.value;
+  if(n&&editTarget!==null){
+    cityExperiences[editTarget].name=n;
+    cityExperiences[editTarget].time=t||cityExperiences[editTarget].time;
+    cityExperiences[editTarget].sub=s||cityExperiences[editTarget].sub;
+  }
+  activeModal=null;editTarget=null;refreshS2();
+}
+
+function refreshS2(){
+  document.getElementById('scr').innerHTML=s2();
+}
+
+function toggleFilter(){
+  filterMode=!filterMode;
+  const fm=document.getElementById('fmode');
+  const txt=document.getElementById('ftxt');
+  if(fm) fm.classList.toggle('show',filterMode);
+  if(txt) txt.textContent=filterMode?'✕ Hide filters':'⚙ Prefer to set filters yourself?';
+}
+
+function useEx(i){
+  const exs=[
+    '3 days in Seoul for a group of 4 friends. 20th–22nd March, overall budget is ₹75,000. Adventure and exciting.',
+    'Solo trip to Paris, 2 days. Into art and cafés. Budget ₹15,000. Feel like a local.',
+    '4 of us in Barcelona for a weekend. Couples trip. Beaches + architecture + nightlife. ₹60,000 total.',
+  ];
+  userPrompt=exs[i];
+  const ta=document.getElementById('ptxt');
+  if(ta) ta.value=userPrompt;
+}
+
+function chT(d){travellers=Math.max(1,Math.min(20,travellers+d));const el=document.getElementById('tv');if(el)el.textContent=travellers;}
+function chD(d){days=Math.max(1,Math.min(14,days+d));const el=document.getElementById('dv');if(el)el.textContent=days;}
+function togInt(v,el){interests.includes(v)?interests=interests.filter(i=>i!==v):interests.push(v);el.classList.toggle('on');}
+
+function updateCityFromFilter(val){
+  const v=val.toLowerCase().trim();
+  if(CITIES[v]) cityKey=v;
+  else{
+    for(const [k,c] of Object.entries(CITIES)){
+      if(c.name.toLowerCase()===v){cityKey=k;break;}
+    }
+  }
+  cityExperiences=JSON.parse(JSON.stringify(CITIES[cityKey].experiences));
+  goS(0);
+}
+
+function showCityPicker(){
+  const cities=['Rome','Seoul','Paris','Barcelona'];
+  const city=fmtCity();
+  // inject a mini picker overlay
+  const scr=document.getElementById('scr');
+  const existing=document.getElementById('city-picker');
+  if(existing){existing.remove();return;}
+  const picker=document.createElement('div');
+  picker.id='city-picker';
+  picker.style.cssText='position:absolute;top:170px;left:13px;right:13px;background:#fff;border-radius:12px;border:1px solid #E0E0E0;box-shadow:0 8px 24px rgba(0,0,0,.15);z-index:20;overflow:hidden;';
+  picker.innerHTML=cities.map(c=>`<div style="padding:11px 14px;font-size:13px;font-weight:${c===city.name?'800':'600'};color:${c===city.name?'#7B00FF':'#000'};cursor:pointer;border-bottom:1px solid #F5F5F5;" onclick="selectCity('${c}')">${c===city.name?'✓ ':''} ${c}</div>`).join('');
+  scr.style.position='relative';
+  scr.appendChild(picker);
+}
+
+function selectCity(name){
+  for(const [k,c] of Object.entries(CITIES)){
+    if(c.name===name){cityKey=k;break;}
+  }
+  cityExperiences=JSON.parse(JSON.stringify(CITIES[cityKey].experiences));
+  userPrompt=userPrompt.replace(/(rome|seoul|paris|barcelona)/gi,name);
+  goS(0);
+}
+
+function planNextCity(name){
+  selectCity(name);
+  userPrompt=`Plan ${days} days in ${name} for ${travellers} people. ${interests.join(' and ')} focus.`;
+  goS(0);
+}
+
+function toggleDrawer(){drawerOpen=!drawerOpen;document.getElementById('drawer').classList.toggle('open',drawerOpen);document.getElementById('ov').classList.toggle('open',drawerOpen);const b=document.getElementById('wbtn');b.classList.toggle('open',drawerOpen);b.textContent=drawerOpen?'✕ Close':'ⓘ Product thinking';}
+function closeDrawer(){drawerOpen=false;document.getElementById('drawer').classList.remove('open');document.getElementById('ov').classList.remove('open');const b=document.getElementById('wbtn');b.classList.remove('open');b.textContent='ⓘ Product thinking';}
+
+// live clock
+function tick(){const n=new Date();document.getElementById('sbt').textContent=n.getHours()+':'+(n.getMinutes()<10?'0':'')+n.getMinutes();}
+tick();setInterval(tick,30000);
+
+/* INIT */
+initFromPrompt();
+goS(0);
+</script>
+</body>
+</html>
