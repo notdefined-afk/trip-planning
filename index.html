@@ -341,7 +341,41 @@ html,body{height:100%;background:#F2F2F7;font-family:'Inter',-apple-system,sans-
 .pay-tab.on{border-color:#7B00FF;color:#7B00FF;background:#F5F0FF;}
 
 /* LEFT SIDEBAR NAV */
+/* SIDEBAR — desktop */
 #sidenav{width:200px;flex-shrink:0;background:#fff;border-right:1px solid #EFEFEF;padding:16px 0;overflow-y:auto;height:100%;}
+
+/* MOBILE NAV BOTTOM BAR */
+#mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #EFEFEF;z-index:500;padding:8px 0 20px;}
+.mn-row{display:flex;justify-content:space-around;align-items:center;}
+.mn-btn{display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 8px;cursor:pointer;flex:1;}
+.mn-ic{font-size:20px;}
+.mn-lb{font-size:9px;color:#aaa;font-weight:600;}
+.mn-btn.on .mn-lb{color:#7B00FF;font-weight:800;}
+
+/* MOBILE MENU SHEET */
+#mobile-sheet-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:600;}
+#mobile-sheet-bg.open{display:block;}
+#mobile-sheet{position:fixed;bottom:0;left:0;right:0;background:#fff;border-radius:20px 20px 0 0;z-index:700;padding:0 0 40px;transform:translateY(100%);transition:transform .28s cubic-bezier(.4,0,.2,1);}
+#mobile-sheet.open{transform:translateY(0);}
+.ms-handle{width:36px;height:4px;background:#E0E0E0;border-radius:2px;margin:10px auto 16px;}
+.ms-section{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#bbb;padding:0 20px 8px;}
+.ms-item{display:flex;align-items:center;gap:12px;padding:11px 20px;font-size:14px;font-weight:600;color:#333;cursor:pointer;transition:background .1s;}
+.ms-item:hover{background:#F8F8F8;}
+.ms-item.on{color:#7B00FF;background:#F5F0FF;}
+.ms-item .ms-ic{font-size:18px;width:24px;text-align:center;}
+.ms-divider{height:1px;background:#F5F5F5;margin:8px 0;}
+
+@media(max-width:700px){
+  #sidenav{display:none !important;}
+  #mobile-nav{display:block;}
+  .pt-label{display:none;}
+  #topbar .tb-div{display:none;}
+  .why-btn{font-size:10px;padding:5px 10px;}
+  #stage-wrap{background:#fff;}
+  #stage{padding:0;background:#fff;overflow-y:auto;align-items:flex-start;}
+  #phone{width:100%;max-width:100%;border-radius:0;box-shadow:none;min-height:calc(100vh - 48px);max-height:none;height:auto;}
+  .sb{display:none;}
+}
 .snav-section{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#ccc;padding:0 16px 6px;margin-top:12px;}
 .snav-section:first-child{margin-top:0;}
 .snav-item{display:flex;align-items:center;gap:9px;padding:9px 16px;cursor:pointer;transition:all .15s;border-radius:0;font-size:12px;font-weight:600;color:#666;}
@@ -402,7 +436,7 @@ html,body{height:100%;background:#F2F2F7;font-family:'Inter',-apple-system,sans-
 <div id="topbar">
   <div class="tb-logo">headout</div>
   <div class="tb-div"></div>
-  <div style="font-size:11px;font-weight:600;color:#aaa;">DayMind AI Planner · Interactive Prototype</div>
+  <div class="pt-label" style="font-size:11px;font-weight:600;color:#aaa;">AI Trip Planner · Prototype</div>
   <div class="tb-r">
     <div class="why-btn" id="wbtn" onclick="toggleDrawer()">ⓘ Product thinking</div>
   </div>
@@ -429,6 +463,41 @@ html,body{height:100%;background:#F2F2F7;font-family:'Inter',-apple-system,sans-
   <div class="snav-item" onclick="tryGroup(2,'Couple')"><span class="sni">💑</span><span class="snl">2 people</span></div>
   <div class="snav-item" onclick="tryGroup(4,'Group of 4')"><span class="sni">👥</span><span class="snl">Group of 4</span></div>
   <div class="snav-item" onclick="tryGroup(8,'Large group')"><span class="sni">🎉</span><span class="snl">Group of 8</span></div>
+</div>
+
+<!-- MOBILE BOTTOM NAV -->
+<div id="mobile-nav">
+  <div class="mn-row">
+    <div class="mn-btn on" id="mn0" onclick="navTo(0);setMnActive(0)"><div class="mn-ic">🏠</div><div class="mn-lb">Home</div></div>
+    <div class="mn-btn" id="mn2" onclick="navTo(2);setMnActive(2)"><div class="mn-ic">📋</div><div class="mn-lb">Plan</div></div>
+    <div class="mn-btn" id="mn3" onclick="navTo(3);setMnActive(3)"><div class="mn-ic">💳</div><div class="mn-lb">Pay</div></div>
+    <div class="mn-btn" id="mn4" onclick="navTo(4);setMnActive(4)"><div class="mn-ic">✅</div><div class="mn-lb">Done</div></div>
+    <div class="mn-btn" id="mn-more" onclick="openMobileSheet()"><div class="mn-ic">☰</div><div class="mn-lb">More</div></div>
+  </div>
+</div>
+
+<!-- MOBILE SHEET (cities / groups) -->
+<div id="mobile-sheet-bg" onclick="closeMobileSheet()"></div>
+<div id="mobile-sheet">
+  <div class="ms-handle"></div>
+  <div class="ms-section">Jump to screen</div>
+  <div class="ms-item on" data-ms="0" onclick="navTo(0);closeMobileSheet()"><span class="ms-ic">🏠</span> Landing page</div>
+  <div class="ms-item" data-ms="1" onclick="navTo(1);closeMobileSheet()"><span class="ms-ic">⚡</span> AI building</div>
+  <div class="ms-item" data-ms="2" onclick="navTo(2);closeMobileSheet()"><span class="ms-ic">📋</span> Verify plan</div>
+  <div class="ms-item" data-ms="3" onclick="navTo(3);closeMobileSheet()"><span class="ms-ic">💳</span> Payment</div>
+  <div class="ms-item" data-ms="4" onclick="navTo(4);closeMobileSheet()"><span class="ms-ic">✅</span> Confirmed</div>
+  <div class="ms-divider"></div>
+  <div class="ms-section">Try a city</div>
+  <div class="ms-item" onclick="tryCity('rome');closeMobileSheet()"><span class="ms-ic">🏛️</span> Rome</div>
+  <div class="ms-item" onclick="tryCity('seoul');closeMobileSheet()"><span class="ms-ic">🏯</span> Seoul</div>
+  <div class="ms-item" onclick="tryCity('paris');closeMobileSheet()"><span class="ms-ic">🗼</span> Paris</div>
+  <div class="ms-item" onclick="tryCity('barcelona');closeMobileSheet()"><span class="ms-ic">🏖️</span> Barcelona</div>
+  <div class="ms-divider"></div>
+  <div class="ms-section">Try a group size</div>
+  <div class="ms-item" onclick="tryGroup(1,'Solo');closeMobileSheet()"><span class="ms-ic">🙋</span> Solo</div>
+  <div class="ms-item" onclick="tryGroup(2,'Couple');closeMobileSheet()"><span class="ms-ic">💑</span> 2 people</div>
+  <div class="ms-item" onclick="tryGroup(4,'Group of 4');closeMobileSheet()"><span class="ms-ic">👥</span> Group of 4</div>
+  <div class="ms-item" onclick="tryGroup(8,'Large group');closeMobileSheet()"><span class="ms-ic">🎉</span> Group of 8</div>
 </div>
 
 <div id="stage">
@@ -1268,11 +1337,28 @@ function s4(){
 function goS(n){
   if(n===1) initFromPrompt();
   curS=n;
-  // sync sidebar
+  // sync desktop sidebar
   document.querySelectorAll('.snav-item[data-s]').forEach(el=>el.classList.toggle('on',+el.dataset.s===n));
+  // sync mobile sheet items
+  document.querySelectorAll('.ms-item[data-ms]').forEach(el=>el.classList.toggle('on',+el.dataset.ms===n));
+  // sync mobile bottom nav
+  [0,2,3,4].forEach(i=>{const el=document.getElementById('mn'+i);if(el)el.classList.toggle('on',i===n);});
   activeModal=null;
   document.getElementById('scr').innerHTML=[s0,s1,s2,s3,s4][n]();
   document.getElementById('scr').scrollTop=0;
+}
+
+function setMnActive(n){
+  [0,2,3,4].forEach(i=>{const el=document.getElementById('mn'+i);if(el)el.classList.toggle('on',i===n);});
+}
+
+function openMobileSheet(){
+  document.getElementById('mobile-sheet-bg').classList.add('open');
+  document.getElementById('mobile-sheet').classList.add('open');
+}
+function closeMobileSheet(){
+  document.getElementById('mobile-sheet-bg').classList.remove('open');
+  document.getElementById('mobile-sheet').classList.remove('open');
 }
 
 function navTo(n){
